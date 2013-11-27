@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Choose Your Team" 
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_margin="5sp"
+        android:layout_marginTop="20sp" />
+
+    <Button
+        android:id="@+id/btnTeamA"
+        android:layout_width="108dp"
+        android:layout_height="wrap_content"
+        android:text="A"
+        android:textColor="#3366FF"
+        android:textStyle="bold"
+        android:textSize="40sp"
+  		android:padding="30dp"
+  		android:layout_margin="40dp"
+  		android:layout_gravity="center" />
+
+    <Button
+        android:id="@+id/btnTeamB"
+        android:layout_width="108dp"
+        android:layout_height="wrap_content"
+        android:text="B"
+        android:textColor="#FFFF00"
+        android:textStyle="bold"
+        android:textSize="40sp"
+        android:padding="30dp" 
+        android:layout_marginTop="3dp"
+  		android:layout_gravity="center" />
+
+</LinearLayout>
