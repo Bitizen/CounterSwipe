@@ -7,10 +7,12 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RadioButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class HostLobbyActivity extends Activity implements View.OnClickListener {
 
+	private TextView usernameTv;
 	private RadioButton teammate1;
 	private Button beginBtn;
 	
@@ -25,10 +27,11 @@ public class HostLobbyActivity extends Activity implements View.OnClickListener 
 		setContentView(R.layout.activity_hostlobby);
 		initializeElements();
 		
-		teammate1.setOnClickListener(this);
+		beginBtn.setOnClickListener(this);
 	}
 
 	private void initializeElements() {
+		usernameTv = (TextView) findViewById(R.id.tvUsernameInLobby);
 		teammate1 = (RadioButton) findViewById(R.id.rbHTeammate1);
 		beginBtn = (Button) findViewById(R.id.btnBegin);
 	

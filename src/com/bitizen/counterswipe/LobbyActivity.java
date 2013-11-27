@@ -7,9 +7,11 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RadioButton;
+import android.widget.TextView;
 
 public class LobbyActivity extends Activity implements View.OnClickListener {
 
+	private TextView usernameTv;
 	private RadioButton teammate1;
 	private Button readyBtn;
 	
@@ -24,17 +26,17 @@ public class LobbyActivity extends Activity implements View.OnClickListener {
 		setContentView(R.layout.activity_lobby);
 		initializeElements();
 		
-		teammate1.setOnClickListener(this);
+		readyBtn.setOnClickListener(this);
 	}
 
 	private void initializeElements() {
+		usernameTv = (TextView) findViewById(R.id.tvUsernameInLobby);
 		teammate1 = (RadioButton) findViewById(R.id.rbTeammate1);
 		readyBtn = (Button) findViewById(R.id.btnReady);
 		
 		teammate1.setClickable(false);
 	}
 	
-
 	@Override
 	public void onClick(View view) {
 		switch (view.getId()) {
@@ -66,6 +68,8 @@ public class LobbyActivity extends Activity implements View.OnClickListener {
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
 			}
+			
+			teammate1.setChecked(false);
 		}
 	}
 }
