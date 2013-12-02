@@ -25,7 +25,7 @@ public class PreCameraActivity extends Activity {
 
         String message = "Click the button below to start";
         if(cameraNotDetected()){
-        	message = "No camera detected, clicking the button below will have unexpected behaviour.";
+        	message = "No camera detected.";
         }
         TextView cameraDescriptionTextView = (TextView) findViewById(R.id.text_view_camera_description);
         cameraDescriptionTextView.setText(message);

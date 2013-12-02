@@ -33,20 +33,23 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
     public static final class id {
         public static final int btnHost=0x7f09000a;
         public static final int btnJoin=0x7f090009;
+        public static final int btnLeave=0x7f09000f;
         public static final int btnNext=0x7f090002;
-        public static final int btnTeamA=0x7f09000d;
-        public static final int btnTeamB=0x7f09000e;
+        public static final int btnReplay=0x7f09000e;
+        public static final int btnTeamA=0x7f090010;
+        public static final int btnTeamB=0x7f090011;
         public static final int camera_preview=0x7f090003;
         public static final int etUsername=0x7f090008;
         public static final int image_view_captured_image=0x7f09000c;
-        public static final int mi_begin=0x7f09000f;
-        public static final int mi_kick=0x7f090011;
-        public static final int mi_quit=0x7f090010;
-        public static final int mi_ready=0x7f090012;
+        public static final int mi_begin=0x7f090012;
+        public static final int mi_kick=0x7f090014;
+        public static final int mi_quit=0x7f090013;
+        public static final int mi_ready=0x7f090015;
         public static final int rbHTeammate1=0x7f090005;
         public static final int rbMatch1=0x7f090001;
         public static final int rbTeammate1=0x7f090007;
         public static final int text_view_camera_description=0x7f09000b;
+        public static final int tvResults=0x7f09000d;
         public static final int tvUsernameInAM=0x7f090000;
         public static final int tvUsernameInHLobby=0x7f090004;
         public static final int tvUsernameInLobby=0x7f090006;
@@ -58,7 +61,8 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int activity_lobby=0x7f030003;
         public static final int activity_login=0x7f030004;
         public static final int activity_precamera=0x7f030005;
-        public static final int activity_teamselect=0x7f030006;
+        public static final int activity_results=0x7f030006;
+        public static final int activity_teamselect=0x7f030007;
     }
     public static final class menu {
         public static final int menu_host=0x7f080000;
@@ -128,7 +132,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
           <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
-          @attr name com.bitizen.counterswipe:buttonBarButtonStyle
+          @attr name android:buttonBarButtonStyle
         */
         public static final int ButtonBarContainerTheme_buttonBarButtonStyle = 1;
         /**
@@ -138,7 +142,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
           <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
-          @attr name com.bitizen.counterswipe:buttonBarStyle
+          @attr name android:buttonBarStyle
         */
         public static final int ButtonBarContainerTheme_buttonBarStyle = 0;
     };

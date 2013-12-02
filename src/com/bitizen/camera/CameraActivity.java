@@ -11,8 +11,10 @@ import com.bitizen.camera.FromXML;
 import com.bitizen.camera.CameraPreview;
 import com.bitizen.camera.util.Log;
 import com.bitizen.counterswipe.R;
+import com.bitizen.counterswipe.ResultsActivity;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
@@ -21,10 +23,12 @@ import android.view.View;
 
 public class CameraActivity extends Activity implements PictureCallback {
 
-	protected static final String EXTRA_IMAGE_PATH = "com.bitizen.camera.CameraActivity.EXTRA_IMAGE_PATH";
+	public static final String EXTRA_IMAGE_PATH = "com.bitizen.camera.CameraActivity.EXTRA_IMAGE_PATH";
 
 	private Camera camera;
 	private CameraPreview cameraPreview;
+	
+	private final Context CONTEXT = this;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -50,9 +54,15 @@ public class CameraActivity extends Activity implements PictureCallback {
 	public void onCaptureClick(View button){
 		// Take a picture with a callback when the photo has been created
 		// Here you can add callbacks if you want to give feedback when the picture is being taken
-		camera.takePicture(null, null, this);
+		//camera.takePicture(null, null, this);
 	}
 
+	@FromXML
+	public void onMenuClick(View button){
+		Intent intent = new Intent(this, ResultsActivity.class);
+    	startActivity(intent);
+	}
+	
 	@Override
 	public void onPictureTaken(byte[] data, Camera camera) {
 		Log.d("Picture taken");
