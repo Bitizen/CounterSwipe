@@ -29,7 +29,7 @@ public class ResultsActivity extends Activity implements View.OnClickListener{
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_login);
+		setContentView(R.layout.activity_results);
 		initializeElements();
 		
 		replayBtn.setOnClickListener(this);
@@ -37,7 +37,7 @@ public class ResultsActivity extends Activity implements View.OnClickListener{
 	}
 
 	private void initializeElements() {
-		resultsTv = (EditText) findViewById(R.id.tvResults);
+		resultsTv = (TextView) findViewById(R.id.tvResults);
 		replayBtn = (Button) findViewById(R.id.btnReplay);
 		leaveBtn = (Button) findViewById(R.id.btnLeave);
 	}
