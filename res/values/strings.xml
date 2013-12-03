@@ -1,5 +1,9 @@
 <resources>
 
     <string name="app_name">CounterSwipe</string>
-
+	<string name="begin_item">BEGIN</string>
+	<string name="quit_item">QUIT</string>
+	<string name="kick_item">KICK</string>
+	<string name="switchTeam_item">SWITCH TEAM</string>
+	<string name="ready_item">READY</string>
 </resources>

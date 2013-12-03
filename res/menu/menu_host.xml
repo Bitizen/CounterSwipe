@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <menu xmlns:android="http://schemas.android.com/apk/res/android">
+        
+        <item android:id="@+id/mi_begin"
+          android:title="@string/begin_item"
+          android:numericShortcut="1"
+          android:alphabeticShortcut="a"
+        />
+   		<item android:id="@+id/mi_quit"
+          android:title="@string/quit_item"
+          android:numericShortcut="2"
+          android:alphabeticShortcut="b"
+        />
+   		<item android:id="@+id/mi_kick"
+          android:title="@string/kick_item"
+          android:numericShortcut="3"
+          android:alphabeticShortcut="c"
+        />
+    </menu>
