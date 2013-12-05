@@ -48,12 +48,14 @@ public class ResultsActivity extends Activity implements View.OnClickListener{
 		switch (view.getId()) {
 			case R.id.btnReplay:
 				newIntent = new Intent(CONTEXT, LobbyActivity.class);
+				newIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 				//newIntent.putExtra(KEY_USERNAME, usernameEt.getText().toString());
 				startActivity(newIntent);
 				break;
 				
 			case R.id.btnLeave:
 				newIntent = new Intent(CONTEXT, AvailableMatchesActivity.class);
+				newIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 				//newIntent.putExtra(KEY_USERNAME, usernameEt.getText().toString());
 				startActivity(newIntent);
 				break;

@@ -45,14 +45,14 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int mi_kick=0x7f090014;
         public static final int mi_quit=0x7f090013;
         public static final int mi_ready=0x7f090015;
-        public static final int rbHTeammate1=0x7f090005;
+        public static final int rbHOpponent1=0x7f090005;
+        public static final int rbHTeammate1=0x7f090004;
         public static final int rbMatch1=0x7f090001;
-        public static final int rbTeammate1=0x7f090007;
+        public static final int rbPlayerA1=0x7f090006;
+        public static final int rbPlayerB1=0x7f090007;
         public static final int text_view_camera_description=0x7f09000b;
         public static final int tvResults=0x7f09000d;
         public static final int tvUsernameInAM=0x7f090000;
-        public static final int tvUsernameInHLobby=0x7f090004;
-        public static final int tvUsernameInLobby=0x7f090006;
     }
     public static final class layout {
         public static final int activity_availablematches=0x7f030000;

@@ -5,10 +5,9 @@
     android:orientation="vertical" >
 
     <TextView
-        android:id="@+id/tvUsernameInLobby"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Username" 
+        android:text="LOBBY" 
         android:textSize="25sp"
         android:gravity="center"
         android:layout_margin="5sp"
@@ -18,21 +17,32 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="15sp"
-        android:layout_margin="5sp"
-        android:text="Team Lobby" />
-
-    <RadioGroup
+        android:layout_gravity="center"
+        android:layout_marginTop="25sp"
+        android:text="Team A" />
+    
+    <RadioButton
+        android:id="@+id/rbPlayerA1"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
-	
-	    <RadioButton
-	        android:id="@+id/rbTeammate1"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:textSize="15sp"
-	        android:layout_margin="5sp"
-	        android:text="YOU" />
-   	
-    </RadioGroup>
+        android:layout_height="wrap_content"
+        android:textSize="15sp"
+        android:layout_marginLeft="80sp"
+        android:text="player_a_username" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="15sp"
+        android:layout_gravity="center"
+        android:layout_marginTop="25sp"
+        android:text="Team B" />
+    
+    <RadioButton
+        android:id="@+id/rbPlayerB1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="15sp"
+        android:layout_marginLeft="80sp"
+        android:text="player_b_username" />
+    
 </LinearLayout>

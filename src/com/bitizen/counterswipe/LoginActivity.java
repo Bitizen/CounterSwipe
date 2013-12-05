@@ -35,9 +35,13 @@ public class LoginActivity extends Activity implements View.OnClickListener{
 
     private Socket socket;
     private static final int SERVERPORT = 6000;
-    //private static final String SERVER_IP = "10.0.2.15";
-    private static final String SERVER_IP = "10.0.1.106"; // DICE
-    //private static final String SERVER_IP = "10.0.2.2";
+    
+    //TODO GOAL: Figure out a way so we don't have to hardcode the IP.
+    //TODO 		Idea 1: Set IP add programmatically. 
+    //TODO 			Ex. http://stackoverflow.com/questions/4106502/set-android-ip-dns-gateway-setting-programatically
+    //TODO 		Idea 2: Listen for server's broadcast which will contain its IP.
+    //TODO 			Ex. http://stackoverflow.com/questions/9505007/how-to-get-ip-address-of-other-mobile-device
+    private static final String SERVER_IP = "10.0.2.33";
     
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +70,9 @@ public class LoginActivity extends Activity implements View.OnClickListener{
 					String clientUsername = usernameEt.getText().toString();
 					PrintWriter out = new PrintWriter(new BufferedWriter(
 							new OutputStreamWriter(socket.getOutputStream())), true);
-					out.println(clientUsername);
+					if (clientUsername != null) {
+						out.println(clientUsername);
+					}
 				} catch (UnknownHostException e) {
 		            e.printStackTrace();
 		        } catch (IOException e) {

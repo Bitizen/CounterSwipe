@@ -1,6 +1,15 @@
 package com.bitizen.counterswipe;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
+
 import com.bitizen.camera.CameraActivity;
+import com.bitizen.counterswipe.LoginActivity.ClientThread;
 
 import android.app.Activity;
 import android.content.Context;
@@ -17,8 +26,9 @@ import android.widget.Toast;
 
 public class LobbyActivity extends Activity {
 
-	private TextView usernameTv;
-	private RadioButton teammate1;
+	private String username;
+	
+	private RadioButton playerA1, playerB1;
 	
 	private final Context CONTEXT = this;
 	private final String KEY_USERNAME = "username";
@@ -26,37 +36,93 @@ public class LobbyActivity extends Activity {
 	private final String KEY_TEAM = "team";
 
     private static final int REQ_CAMERA_IMAGE = 123;
+
+    private Socket socket;
+    private static final int SERVERPORT = 6000;
+    private static final String SERVER_IP = "192.168.1.25";
     
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_lobby);
 		initializeElements();
+		
+		Bundle extras = getIntent().getExtras();
+		if (extras != null) {
+		    username = extras.getString(KEY_USERNAME);
+		} else {
+			username = "player_username";
+		}
+		
+		new Thread(new ClientThread()).start();
+		new Thread(new CheckerThread()).start();
 	}
 
 	private void initializeElements() {
-		usernameTv = (TextView) findViewById(R.id.tvUsernameInLobby);
-		teammate1 = (RadioButton) findViewById(R.id.rbTeammate1);
-		teammate1.setClickable(false);
+		playerA1 = (RadioButton) findViewById(R.id.rbPlayerA1);
+		playerB1 = (RadioButton) findViewById(R.id.rbPlayerB1);
+		playerA1.setClickable(false);
+		playerB1.setClickable(false);
 	}
-	
-	private void toggleReady() {
-		if (teammate1.isChecked()) {
-			teammate1.setChecked(false);
-		} else if (!teammate1.isChecked() ){
-			teammate1.setChecked(true);
-			checkForFlag();
+
+	class ClientThread implements Runnable {
+		@Override
+		public void run() {
+			try {
+				InetAddress serverAddr = InetAddress.getByName(SERVER_IP);
+				socket = new Socket(serverAddr, SERVERPORT);
+			} catch (UnknownHostException e1) {
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
 		}
 	}
 	
-	private void checkForFlag() {
-		Boolean allReady = teammate1.isChecked();
+	class CheckerThread implements Runnable {
+		 @Override
+		public void run() {
+			try{
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} finally {
+				checkForFlag();
+			}
+		}
+	}
+	
+	private void toggleReady(RadioButton rb) {
+		String isReady = "false";
 		
-		if (allReady) {
+		if (rb.isChecked()) {
+			rb.setChecked(false);			
+		} else if (!rb.isChecked() ){
+			rb.setChecked(true);
+			isReady = "true";
+		}
+		
+		try {
+			PrintWriter out = new PrintWriter(new BufferedWriter(
+					new OutputStreamWriter(socket.getOutputStream())), true);
+			out.println(isReady);
+		} catch (UnknownHostException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+	}
+	
+	private void checkForFlag() {
+		if (playerA1.isChecked()
+				&& playerB1.isChecked()) {
 			Intent intent = new Intent(this, CameraActivity.class);
 	    	startActivityForResult(intent, REQ_CAMERA_IMAGE);
-	    	
-			teammate1.setChecked(false);
+
+			playerA1.setChecked(false);
+			playerB1.setChecked(false);
 		}
 	}
 
@@ -78,7 +144,7 @@ public class LobbyActivity extends Activity {
         	// Single menu item is selected do something
         	// Ex: launching new activity/screen or show alert message
             Toast.makeText(LobbyActivity.this, "Ready is Selected", Toast.LENGTH_SHORT).show();
-            toggleReady();
+            toggleReady(playerB1);
             checkForFlag();
             return true;
         default:
