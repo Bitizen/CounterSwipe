@@ -9,7 +9,6 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 import com.bitizen.camera.CameraActivity;
-import com.bitizen.counterswipe.LoginActivity.ClientThread;
 
 import android.app.Activity;
 import android.content.Context;
@@ -39,7 +38,7 @@ public class LobbyActivity extends Activity {
 
     private Socket socket;
     private static final int SERVERPORT = 6000;
-    private static final String SERVER_IP = "10.0.2.33";
+    private static final String SERVER_IP = "192.168.1.25";
     
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

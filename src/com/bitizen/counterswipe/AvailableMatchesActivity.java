@@ -1,12 +1,5 @@
 package com.bitizen.counterswipe;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.net.Socket;
-import java.net.UnknownHostException;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -26,15 +19,7 @@ public class AvailableMatchesActivity extends Activity implements View.OnClickLi
 	private final Context CONTEXT = this;
 	private final String KEY_USERNAME = "username";
 	private final String KEY_MATCH = "match";
-	private final String KEY_NULL = "0";
-	private final String KEY_MATCH_ONE = "1";
-	private final String KEY_MATCH_TWO = "2";
-	private final String KEY_MATCH_THREE = "3";
-
-    private Socket socket;
-    private static final int SERVERPORT = 6000;
-    private static final String SERVER_IP = "10.0.2.33";
-    
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -65,12 +50,9 @@ public class AvailableMatchesActivity extends Activity implements View.OnClickLi
 	
 	@Override
 	public void onClick(View view) {
-		String chosenMatch = KEY_NULL;
-		
 		switch (view.getId()) {
 			case R.id.btnNext:
 				if (match1.isChecked()) {
-					chosenMatch = KEY_MATCH_ONE;
 					Intent newIntent = new Intent(CONTEXT, TeamSelectActivity.class);
 					startActivity(newIntent);
 				} else {
@@ -78,18 +60,6 @@ public class AvailableMatchesActivity extends Activity implements View.OnClickLi
 				}
 				break;
 		}
-		
-		try {
-			PrintWriter out = new PrintWriter(new BufferedWriter(
-					new OutputStreamWriter(socket.getOutputStream())), true);
-			out.println(chosenMatch);
-		} catch (UnknownHostException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 		
 	}
 }
