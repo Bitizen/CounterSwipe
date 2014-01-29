@@ -18,20 +18,21 @@ import android.widget.Toast;
 
 public class SocketService extends Service {
 
-	protected String result;
-	protected String message;
-    protected Socket socket;
-    protected InputStreamReader isr;
-    protected BufferedReader reader;
-    protected PrintWriter out;
-    protected ExecutorService es;
-    protected Runnable updateRunnable;
+	private Boolean setup = false;
+	private String result;
+	private String message;
+	private Socket socket;
+	private InputStreamReader isr;
+	private BufferedReader reader;
+	private PrintWriter out;
+	private ExecutorService es;
+	private Runnable updateRunnable;
 
     private InetAddress serverAddr;
 	private final IBinder myBinder = new LocalBinder();
 	//private TCPClient mTcpClient = new TCPClient();
-	protected static final int SERVERPORT = 5559;
-	protected static final String SERVERIP = "192.168.0.16";   
+	private static final int SERVERPORT = 5559;
+	private static final String SERVERIP = "192.168.0.16";   
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -79,7 +80,6 @@ public class SocketService extends Service {
         System.out.println("I am in on start");
         //  Toast.makeText(this,"Service created ...", Toast.LENGTH_LONG).show();
         //TRIAL
-    	setupNetworking();
     	
         Runnable read = new readSocket();
         new Thread(read).start();
@@ -121,8 +121,13 @@ public class SocketService extends Service {
     class readSocket implements Runnable {
         @Override
         public void run() {
-        	result = new String();
-			try {
+			if (!setup) {
+				result = new String();
+				setupNetworking();
+				setup = true;
+			}
+			
+        	try {
 				while((result=reader.readLine())!=null) {
 					System.out.println("server: " + result);
 					//UIHandler.post(updateRunnable);
@@ -133,7 +138,6 @@ public class SocketService extends Service {
         }
     }
     
-    /*
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -144,5 +148,4 @@ public class SocketService extends Service {
         }
         socket = null;
     }
-    */
 }

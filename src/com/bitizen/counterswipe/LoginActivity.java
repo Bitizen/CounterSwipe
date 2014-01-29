@@ -167,14 +167,8 @@ public class LoginActivity extends Activity implements View.OnClickListener{
 				message = usernameEt.getText().toString(); 
 				
 				if (mBoundService != null) {
-					System.out.println("mBoundService: " + mBoundService.toString());
-					System.out.println("mConnection: " + mConnection.toString());
-					System.out.println("socket: " + mBoundService.socket.getInetAddress().toString() + " :" + mBoundService.socket.getPort());
-					
 				    mBoundService.sendMessage(message);
 					result = mBoundService.receiveMessage();
-				} else {
-					System.out.println("ERR MBOUNDSER");
 				}
 				//es.execute(new ClientWriterThread());
 				break;
@@ -198,7 +192,6 @@ public class LoginActivity extends Activity implements View.OnClickListener{
 		public void run() {
 			//setupNetworking();
 			
-			result = new String();
 			try {
 				while((result=reader.readLine())!=null) {
 					System.out.println("server: " + result);
