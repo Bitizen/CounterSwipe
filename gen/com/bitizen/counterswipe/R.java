@@ -31,28 +31,33 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int ic_launcher=0x7f020001;
     }
     public static final class id {
-        public static final int btnHost=0x7f09000a;
-        public static final int btnJoin=0x7f090009;
-        public static final int btnLeave=0x7f09000f;
-        public static final int btnNext=0x7f090002;
-        public static final int btnReplay=0x7f09000e;
-        public static final int btnTeamA=0x7f090010;
-        public static final int btnTeamB=0x7f090011;
-        public static final int camera_preview=0x7f090003;
-        public static final int etUsername=0x7f090008;
-        public static final int image_view_captured_image=0x7f09000c;
-        public static final int mi_begin=0x7f090012;
-        public static final int mi_kick=0x7f090014;
-        public static final int mi_quit=0x7f090013;
-        public static final int mi_ready=0x7f090015;
-        public static final int rbHOpponent1=0x7f090005;
-        public static final int rbHTeammate1=0x7f090004;
-        public static final int rbMatch1=0x7f090001;
-        public static final int rbPlayerA1=0x7f090006;
-        public static final int rbPlayerB1=0x7f090007;
-        public static final int text_view_camera_description=0x7f09000b;
-        public static final int tvResults=0x7f09000d;
-        public static final int tvUsernameInAM=0x7f090000;
+        public static final int btnHost=0x7f09000d;
+        public static final int btnJoin=0x7f09000c;
+        public static final int btnLeave=0x7f090012;
+        public static final int btnNext=0x7f090003;
+        public static final int btnReplay=0x7f090011;
+        public static final int btnTeamA=0x7f090015;
+        public static final int btnTeamB=0x7f090016;
+        public static final int camera_preview=0x7f090004;
+        public static final int etUsername=0x7f09000b;
+        public static final int image_view_captured_image=0x7f09000f;
+        public static final int llAvailableMatches=0x7f090000;
+        public static final int mi_begin=0x7f090017;
+        public static final int mi_kick=0x7f090019;
+        public static final int mi_quit=0x7f090018;
+        public static final int mi_ready=0x7f09001a;
+        public static final int rbHOpponent1=0x7f090006;
+        public static final int rbHTeammate1=0x7f090005;
+        public static final int rgAvailableMatches=0x7f090002;
+        public static final int rgTeamA=0x7f090008;
+        public static final int rgTeamB=0x7f09000a;
+        public static final int teamATv=0x7f090007;
+        public static final int teamBTv=0x7f090009;
+        public static final int text_view_camera_description=0x7f09000e;
+        public static final int tvMatchTS=0x7f090014;
+        public static final int tvResults=0x7f090010;
+        public static final int tvUsernameInAM=0x7f090001;
+        public static final int tvUsernameTS=0x7f090013;
     }
     public static final class layout {
         public static final int activity_availablematches=0x7f030000;

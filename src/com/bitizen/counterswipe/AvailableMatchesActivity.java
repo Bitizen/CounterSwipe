@@ -7,90 +7,197 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class AvailableMatchesActivity extends Activity implements View.OnClickListener{
 
+	private LinearLayout matchesLl;
 	private TextView usernameTv;
 	private Button nextBtn;
-	private RadioButton match1;
+	private RadioGroup matchesRg;
 
 	private String result;
 	private String message;
-    private Socket socket;
-	private InputStreamReader isr;
-	private BufferedReader reader;
-	private PrintWriter writer;
-	private ExecutorService es;
-	private Runnable updateRunnable;
-	private final Handler UIHandler = new Handler();
-	private static final int SERVERPORT = 5559;
-    private static final String SERVERHOST = "10.0.0.204";  
+	private String username;
+	private String match;
 	
-	private final Context CONTEXT = this;
+    private Handler serviceHandler;
+	private SocketService mBoundService;
+	private Boolean mIsBound;
+	private ServiceConnection mConnection;
+
+	private final Context CONTEXT = this; 
 	private final String KEY_USERNAME = "username";
 	private final String KEY_MATCH = "match";
+	private final String KEY_LIST_MATCHES = "Matches";
+	
+	private static final String KEY_MATCH_AVAIL 	= "available";
+	private static final String KEY_MATCH_FULL 		= "full";
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_availablematches);
 	    initializeElements();
-	    
+		
 		Bundle extras = getIntent().getExtras();
 	    if (extras != null) {
 	        Intent intent = getIntent();
 	        String str = intent.getStringExtra(KEY_USERNAME);
-	        usernameTv.setText(str);
+	        usernameTv.setText("USERNAME: " + str);
+	        username = str;
 	    }
 		
 	    nextBtn.setOnClickListener(this);
+		
+		startService(new Intent(CONTEXT, SocketService.class));
+        doBindService();
 	}
 
 	private void initializeElements() {
+		result = new String();
+		message = new String();
+		username = new String();
+		match = new String();
+		
+		matchesLl = (LinearLayout) findViewById(R.id.llAvailableMatches);
 		usernameTv = (TextView) findViewById(R.id.tvUsernameInAM);
 	    nextBtn = (Button) findViewById(R.id.btnNext);
-	    match1 = (RadioButton) findViewById(R.id.rbMatch1);
-	    //match2 = (RadioButton) findViewById(R.id.rbMatch2);
-	    //match3 = (RadioButton) findViewById(R.id.rbMatch3);
+	    matchesRg = (RadioGroup) findViewById(R.id.rgAvailableMatches);
 
-	    updateRunnable = new Runnable() {
-	        public void run() {
-	            updateUI();
-	        }
-	    };
+		mBoundService = new SocketService();
+		mConnection = new ServiceConnection() {
+			@Override
+			public void onServiceConnected(ComponentName name, IBinder service) {
+				mBoundService = ((SocketService.LocalBinder)service).getService();
+				mBoundService.registerHandler(serviceHandler);
+			}
+			
+			@Override
+			public void onServiceDisconnected(ComponentName name) {
+			     mBoundService = null;
+			}
+		};
+		
+		serviceHandler = new Handler() {
+		    @Override
+		    public void handleMessage(Message msg) {
+		    	updateUI(msg);
+		    }
+		};
+
+		// Wait for server reply
+		Thread buffer = new Thread() {
+			@Override
+			public void run() {
+				try {
+					this.sleep(2000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				} finally {
+					mBoundService.sendMessage("NEXT");
+				}
+				super.run();
+			}
+		};
+		buffer.start();
 	}
-	 
-    private void updateUI() {
-    	if (result.equalsIgnoreCase("1")) {
-        	Intent newIntent = new Intent(CONTEXT, AvailableMatchesActivity.class);
-			newIntent.putExtra(KEY_USERNAME, message);
-			startActivity(newIntent);
-        } else if (result.equalsIgnoreCase("1")) {
-        	Toast.makeText(CONTEXT, "Username already exists.", Toast.LENGTH_SHORT).show();
-        }
-    }
     
+	
+	
 	@Override
 	public void onClick(View view) {
 		switch (view.getId()) {
 			case R.id.btnNext:
-				if (match1.isChecked()) {
-					Intent newIntent = new Intent(CONTEXT, TeamSelectActivity.class);
-					startActivity(newIntent);
+				
+				int radioButtonID = matchesRg.getCheckedRadioButtonId();
+				System.out.println("rbid: " + radioButtonID);
+				
+				if (radioButtonID > 0) {
+					RadioButton rb = (RadioButton) matchesRg.findViewById(radioButtonID);
+					
+					String m = rb.getText().toString();
+					match = m;
+					System.out.println(m);
+	
+					message = m; 
+					if (mBoundService != null) {
+					    mBoundService.sendMessage(message);
+					}
 				} else {
-					Toast.makeText(CONTEXT, "Please select a match.", Toast.LENGTH_LONG).show();
+					Toast.makeText(CONTEXT, "Please select a match.", Toast.LENGTH_SHORT).show();
 				}
 				break;
 		}
 		
 	}
-}
+	
+    private void updateUI(Message msg) {
+    	String str = msg.obj.toString();
+	    String[] list = str.replaceAll("[\\:\\[\\]]+", "").split("[,\\s]+");
+	    
+	    if (list[0].equalsIgnoreCase(KEY_LIST_MATCHES)) {
+		    createRadioButtons(list);
+	    } else if (list[1].equalsIgnoreCase(KEY_MATCH_AVAIL)) {
+        	Intent newIntent = new Intent(CONTEXT, TeamSelectActivity.class);
+			Bundle extras = new Bundle();
+			extras.putString(KEY_USERNAME, username);
+			extras.putString(KEY_MATCH, match);
+			newIntent.putExtras(extras);
+			startActivity(newIntent);
+        } else if (list[1].equalsIgnoreCase(KEY_MATCH_FULL)) {
+        	Toast.makeText(CONTEXT, "Match is full.", Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    private void createRadioButtons(String[] l) {
+    	int number = l.length;
+    	final RadioButton[] rb = new RadioButton[number];
+        
+    	matchesRg.removeAllViews();
+    	
+        for(int i=1; i<number; i++){
+            rb[i]  = new RadioButton(this);
+            matchesRg.addView(rb[i]);
+            rb[i].setText(l[i]);
+        }
+    }
+    
+	private void doBindService() {
+	   bindService(new Intent(CONTEXT, SocketService.class), mConnection, Context.BIND_AUTO_CREATE);
+	   mIsBound = true;
+	   if(mBoundService != null){
+		   mBoundService.IsBoundable();
+	   } else {
+		   System.out.println("NOT BOUNDABLE");
+	   }
+	}
+
+	private void doUnbindService() {
+	   if (mIsBound) {
+	       unbindService(mConnection);
+	       mIsBound = false;
+	   }
+	}
+	
+	@Override
+	protected void onDestroy() {
+	    super.onDestroy();
+	    doUnbindService();
+	}
+	
+} //end of class 

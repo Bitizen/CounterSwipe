@@ -1,22 +1,10 @@
 package com.bitizen.counterswipe;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import com.bitizen.counterswipe.SocketService.LocalBinder;
-
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.app.Activity;
-import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -34,38 +22,26 @@ public class LoginActivity extends Activity implements View.OnClickListener{
 	
 	private String result;
 	private String message;
-	private Socket socket;
-	private InputStreamReader isr;
-	private BufferedReader reader;
-	private PrintWriter writer;
-	private ExecutorService es;
-	private Runnable updateRunnable;
 	
     private Handler serviceHandler;
-	private final Handler UIHandler = new Handler();
-	private final Context CONTEXT = this;
-	private static final int SERVERPORT = 5559;
-	private static final String SERVERHOST = "192.168.0.16";   
-	private final String KEY_USERNAME = "username";
-	private final String KEY_LOGIN_GOOD = "good";
-	private final String KEY_LOGIN_BAD = "bad"; 
-
-	private static final String KEY_GET_USERNAME	= "username";
-	private static final String KEY_USERNAME_AVAIL 	= "unameavailable";
-	private static final String KEY_USERNAME_TAKEN 	= "unametaken";
-	private static final String KEY_MATCH_AVAIL 	= "matchavailable";
-	private static final String KEY_MATCH_FULL 		= "matchfull";
-	private static final String KEY_TEAM_AVAIL 		= "teamavailable";
-	private static final String KEY_TEAM_FULL 		= "teamfull";
-	private static final String KEY_INVALID			= "invalid";
-	private static final String KEY_READY_USER 		= "waitingforuserready";
-	private static final String KEY_READY_MATCH 	= "waitingformatchready";
-	private static final String KEY_START_GAME 		= "startgame";
-
-	/// SERVICE TRIAL
 	private SocketService mBoundService;
 	private Boolean mIsBound;
 	private ServiceConnection mConnection;
+
+	private final Context CONTEXT = this; 
+	private final String KEY_USERNAME = "username";
+	
+	private static final String KEY_GET_USERNAME	= "username: ";
+	private static final String KEY_USERNAME_AVAIL 	= "uname available!";
+	private static final String KEY_USERNAME_TAKEN 	= "uname taken";
+	private static final String KEY_MATCH_AVAIL 	= "match available";
+	private static final String KEY_MATCH_FULL 		= "match full";
+	private static final String KEY_TEAM_AVAIL 		= "team available";
+	private static final String KEY_TEAM_FULL 		= "team full";
+	private static final String KEY_INVALID			= "invalid";
+	private static final String KEY_READY_USER 		= "waiting for user ready...";
+	private static final String KEY_READY_MATCH 	= "waiting for match ready...";
+	private static final String KEY_START_GAME 		= "start game";
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -76,49 +52,18 @@ public class LoginActivity extends Activity implements View.OnClickListener{
 		joinBtn.setOnClickListener(this);
 		hostBtn.setOnClickListener(this);
 		
+		startService(new Intent(CONTEXT, SocketService.class));
+        doBindService();
+	}
+
+	private void initializeElements() {
 		result = new String();
 		message = new String();
 		
-		startService(new Intent(CONTEXT, SocketService.class));
-        doBindService();
-        
-		//es = Executors.newFixedThreadPool(10);
-		//es.execute(new ClientReaderThread());
-	}
-
-
-
-	private void doBindService() {
-	   bindService(new Intent(CONTEXT, SocketService.class), mConnection, Context.BIND_AUTO_CREATE);
-	   mIsBound = true;
-	   if(mBoundService != null){
-		   mBoundService.IsBoundable();
-	   } else {
-		   System.out.println("NOTBOUNDABLE");
-	   }
-	}
-
-
-	private void doUnbindService() {
-	   if (mIsBound) {
-	       // Detach our existing connection.
-	       unbindService(mConnection);
-	       mIsBound = false;
-	   }
-	}
-
-	@Override
-	protected void onDestroy() {
-	    super.onDestroy();
-	    doUnbindService();
-	}
-	////////////////////
-	
-	private void initializeElements() {
 		joinBtn = (Button) findViewById(R.id.btnJoin);
 		hostBtn = (Button) findViewById(R.id.btnHost);
 		usernameEt = (EditText) findViewById(R.id.etUsername);
-		
+
 		mBoundService = new SocketService();
 		mConnection = new ServiceConnection() {
 			@Override
@@ -136,34 +81,12 @@ public class LoginActivity extends Activity implements View.OnClickListener{
 		serviceHandler = new Handler() {
 		    @Override
 		    public void handleMessage(Message msg) {
-		        updateUI();
+		    	updateUI(msg);
 		    }
 		};
+		
 	}
 
-	private void setupNetworking() {
-		try {
-			socket = new Socket(SERVERHOST, SERVERPORT);
-			isr = new InputStreamReader(socket.getInputStream());
-			reader = new BufferedReader(isr);
-			writer = new PrintWriter(socket.getOutputStream());
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-     
-    private void updateUI() {
-    	if (result.equalsIgnoreCase(KEY_USERNAME_AVAIL)) {
-        	Intent newIntent = new Intent(CONTEXT, AvailableMatchesActivity.class);
-			newIntent.putExtra(KEY_USERNAME, message);
-			startActivity(newIntent);
-        } else if (result.equalsIgnoreCase(KEY_USERNAME_TAKEN)) {
-        	Toast.makeText(CONTEXT, "Username already exists.", Toast.LENGTH_SHORT).show();
-        }
-    }
-        
 	@Override
 	public void onClick(View view) {
 		Intent newIntent;
@@ -173,54 +96,53 @@ public class LoginActivity extends Activity implements View.OnClickListener{
 				
 				if (mBoundService != null) {
 				    mBoundService.sendMessage(message);
-					result = mBoundService.receiveMessage();
 				}
-				//es.execute(new ClientWriterThread());
 				break;
 				
 			case R.id.btnHost:
-				newIntent = new Intent(CONTEXT, HostLobbyActivity.class);
-				newIntent.putExtra(KEY_USERNAME, usernameEt.getText().toString());
-				startActivity(newIntent);
+				//newIntent = new Intent(CONTEXT, HostLobbyActivity.class);
+				//newIntent.putExtra(KEY_USERNAME, usernameEt.getText().toString());
+				//startActivity(newIntent);
 				break;
 		}
 	}
 
-	@Override
-	protected void onPause() {
-		super.onPause();
-		//es.shutdown();
+    private void updateUI(Message msg) {
+    	this.result = msg.obj.toString();
+    	System.out.println("R: " + result);
+    	
+    	if (result.equalsIgnoreCase(KEY_USERNAME_AVAIL)) {
+        	Intent newIntent = new Intent(CONTEXT, AvailableMatchesActivity.class);
+			newIntent.putExtra(KEY_USERNAME, message);
+			startActivity(newIntent);
+        } else if (result.equalsIgnoreCase(KEY_USERNAME_TAKEN)) {
+        	Toast.makeText(CONTEXT, "Username already exists.", Toast.LENGTH_SHORT).show();
+        } else if (result.equalsIgnoreCase(KEY_GET_USERNAME)) {
+        	System.out.println("ERR: Problem with result.");
+        }
+    }
+    
+	private void doBindService() {
+	   bindService(new Intent(CONTEXT, SocketService.class), mConnection, Context.BIND_AUTO_CREATE);
+	   mIsBound = true;
+	   if(mBoundService != null){
+		   mBoundService.IsBoundable();
+	   } else {
+		   System.out.println("NOT BOUNDABLE");
+	   }
+	}
+
+	private void doUnbindService() {
+	   if (mIsBound) {
+	       unbindService(mConnection);
+	       mIsBound = false;
+	   }
 	}
 	
-	protected class ClientReaderThread implements Runnable {
-		@Override
-		public void run() {
-			//setupNetworking();
-			
-			try {
-				while((result=reader.readLine())!=null) {
-					System.out.println("server: " + result);
-					UIHandler.post(updateRunnable);
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}		
-
-	protected class ClientWriterThread implements Runnable {
-		@Override
-		public void run() {
-			try{
-				writer.println(message);
-				writer.flush();
-			}catch (Exception e1) {
-				e1.printStackTrace();
-			}
-		}
+	@Override
+	protected void onDestroy() {
+	    super.onDestroy();
+	    doUnbindService();
 	}
-
-}
-
-
-
+	
+} // end of class

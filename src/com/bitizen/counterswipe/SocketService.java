@@ -21,6 +21,8 @@ import android.widget.Toast;
 public class SocketService extends Service {
 
 	private Boolean setup = false;
+	private int resultTimer = 0;
+	private String res;
 	private String result;
 	private String message;
 	private Socket socket;
@@ -35,36 +37,39 @@ public class SocketService extends Service {
 	private final IBinder myBinder = new LocalBinder();
 	//private TCPClient mTcpClient = new TCPClient();
 	private static final int SERVERPORT = 5559;
-	private static final String SERVERIP = "10.0.2.24";   
-	private final String IDENTIFIER = "result";
+	private static final String SERVERIP = "192.168.0.16";   
+	private final int IDENTIFIER = 1;
 
 	@Override
 	public IBinder onBind(Intent intent) {
-		System.out.println("I am in Ibinder onBind method");
+		//System.out.println("I am in Ibinder onBind method");
 	    return myBinder;
 	}
 
 	public class LocalBinder extends Binder {
 		public SocketService getService() {
-			System.out.println("I am in Localbinder ");
+			//System.out.println("I am in Localbinder ");
 			return SocketService.this;
 		}
 	}
 
     @Override
     public void onCreate() {
-        super.onCreate();
-        System.out.println("I am in on create");     
+        super.onCreate(); 
+		res = new String(); 
+		result = new String();  
+		message = new String();  
+        //System.out.println("I am in on create");  
     }
 
     public void IsBoundable() {
         //Toast.makeText(this,"I bind like butter", Toast.LENGTH_LONG).show();
-    	System.out.println("BOUNDABLE");
+    	//System.out.println("BOUNDABLE");
     }
 
     public void sendMessage(String message) {
         if (out != null && !out.checkError()) {
-            System.out.println("in sendMessage"+message);
+            System.out.println("[C] " + message);
             out.println(message);
             out.flush();
         }
@@ -72,16 +77,16 @@ public class SocketService extends Service {
 
     public String receiveMessage() {
         if (message != null) {
-        	return result;
+        	return res;
         } else {
-        	return "result is null";
+        	return "res is NULL";
         }
     }
     
     @Override
     public int onStartCommand(Intent intent,int flags, int startId){
         super.onStartCommand(intent, flags, startId);
-        System.out.println("I am in on start");
+        //System.out.println("I am in on start");
         //  Toast.makeText(this,"Service created ...", Toast.LENGTH_LONG).show();
         //TRIAL
     	
@@ -131,17 +136,19 @@ public class SocketService extends Service {
         @Override
         public void run() {
 			if (!setup) {
-				result = new String();
 				setupNetworking();
 				setup = true;
 			}
 			
         	try {
 				while((result=reader.readLine())!=null) {
-					System.out.println("server: " + result);
+					System.out.println("[S] " + result);
+					
 					//UIHandler.post(updateRunnable);
-					//Message msg = handler.obtainMessage(IDENTIFIER, result);
-					//handler.sendMessage(msg);
+					if (handler != null) {
+						Message msg = handler.obtainMessage(IDENTIFIER, result);
+						handler.sendMessage(msg);
+					}
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
