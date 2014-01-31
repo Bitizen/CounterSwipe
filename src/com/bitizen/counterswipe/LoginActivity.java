@@ -9,9 +9,12 @@ import java.net.UnknownHostException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import com.bitizen.counterswipe.SocketService.LocalBinder;
+
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.app.Activity;
 import android.app.Service;
 import android.content.ComponentName;
@@ -29,19 +32,20 @@ public class LoginActivity extends Activity implements View.OnClickListener{
 	private Button joinBtn;
 	private Button hostBtn;
 	
-	protected String result;
-	protected String message;
-    protected Socket socket;
-    protected InputStreamReader isr;
-    protected BufferedReader reader;
-    protected PrintWriter writer;
-    protected ExecutorService es;
-    protected Runnable updateRunnable;
+	private String result;
+	private String message;
+	private Socket socket;
+	private InputStreamReader isr;
+	private BufferedReader reader;
+	private PrintWriter writer;
+	private ExecutorService es;
+	private Runnable updateRunnable;
 	
+    private Handler serviceHandler;
 	private final Handler UIHandler = new Handler();
-	protected final Context CONTEXT = this;
-	protected static final int SERVERPORT = 5559;
-	protected static final String SERVERHOST = "192.168.0.16";   
+	private final Context CONTEXT = this;
+	private static final int SERVERPORT = 5559;
+	private static final String SERVERHOST = "192.168.0.16";   
 	private final String KEY_USERNAME = "username";
 	private final String KEY_LOGIN_GOOD = "good";
 	private final String KEY_LOGIN_BAD = "bad"; 
@@ -120,6 +124,7 @@ public class LoginActivity extends Activity implements View.OnClickListener{
 			@Override
 			public void onServiceConnected(ComponentName name, IBinder service) {
 				mBoundService = ((SocketService.LocalBinder)service).getService();
+				mBoundService.registerHandler(serviceHandler);
 			}
 			
 			@Override
@@ -128,12 +133,12 @@ public class LoginActivity extends Activity implements View.OnClickListener{
 			}
 		};
 		
-	    updateRunnable = new Runnable() {
-	        public void run() {
-	            updateUI();
-	        }
-	    };
-	    
+		serviceHandler = new Handler() {
+		    @Override
+		    public void handleMessage(Message msg) {
+		        updateUI();
+		    }
+		};
 	}
 
 	private void setupNetworking() {

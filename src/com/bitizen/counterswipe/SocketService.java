@@ -12,7 +12,9 @@ import java.util.concurrent.ExecutorService;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -27,12 +29,14 @@ public class SocketService extends Service {
 	private PrintWriter out;
 	private ExecutorService es;
 	private Runnable updateRunnable;
-
+	private Handler handler;
+	
     private InetAddress serverAddr;
 	private final IBinder myBinder = new LocalBinder();
 	//private TCPClient mTcpClient = new TCPClient();
 	private static final int SERVERPORT = 5559;
-	private static final String SERVERIP = "192.168.0.16";   
+	private static final String SERVERIP = "10.0.2.24";   
+	private final String IDENTIFIER = "result";
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -83,9 +87,14 @@ public class SocketService extends Service {
     	
         Runnable read = new readSocket();
         new Thread(read).start();
+        
         return START_STICKY;
     }
 
+    public void registerHandler(Handler serviceHandler) {
+        handler = serviceHandler;
+    }
+    
     /*
     class connectSocket implements Runnable {
         @Override
@@ -131,6 +140,8 @@ public class SocketService extends Service {
 				while((result=reader.readLine())!=null) {
 					System.out.println("server: " + result);
 					//UIHandler.post(updateRunnable);
+					//Message msg = handler.obtainMessage(IDENTIFIER, result);
+					//handler.sendMessage(msg);
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
