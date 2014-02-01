@@ -6,4 +6,18 @@
 	<string name="kick_item">KICK</string>
 	<string name="switchTeam_item">SWITCH TEAM</string>
 	<string name="ready_item">READY</string>
+	
+	<string name="teamA">Team A</string>
+	<string name="teamB">Team B</string>
+	<string name="color">COLOR</string>
+	
+
+    <string-array name="colors_array">
+		<item>RED</item>
+		<item>BLUE</item>
+		<item>ORANGE</item>
+		<item>YELLOW</item>
+		<item>GREEN</item>
+    </string-array>
+	
 </resources>

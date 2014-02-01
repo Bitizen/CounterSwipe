@@ -6,6 +6,16 @@
           android:numericShortcut="1"
           android:alphabeticShortcut="a"
         />
+        <item android:id="@+id/mi_setHSelfColor"
+          android:title="SET COLOR"
+          android:numericShortcut="4"
+          android:alphabeticShortcut="d"
+        />
+        <item android:id="@+id/mi_setHTeamColor"
+          android:title="SET TEAM COLOR"
+          android:numericShortcut="4"
+          android:alphabeticShortcut="d"
+        />
    		<item android:id="@+id/mi_quit"
           android:title="@string/quit_item"
           android:numericShortcut="2"

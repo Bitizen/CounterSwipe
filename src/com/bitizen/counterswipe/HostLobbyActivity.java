@@ -9,41 +9,74 @@ import java.net.Socket;
 import com.bitizen.camera.CameraActivity;
 import com.bitizen.camera.util.BitmapHelper;
 import com.bitizen.camera.util.Log;
-import com.bitizen.counterswipe.HostLobbyActivity.CommunicationThread;
-import com.bitizen.counterswipe.HostLobbyActivity.ServerThread;
-import com.bitizen.counterswipe.HostLobbyActivity.updateUIThread;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.view.Gravity;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class HostLobbyActivity extends Activity {
 
-	private String username;
-	private RadioButton teammate1, opponent1;
+	private Spinner sTeamA, sTeamB;
+	private RadioButton myRb;
+	private RadioButton rbRed, rbBlue, rbGreen, rbYellow, rbOrange;
+	private RadioGroup teamARg, teamBRg, rgColors;
+	private Button setColorB, setTeamColorB;
+
+	private Boolean isReady = false;
+	private String result;
+	private String message;
+	private String username, match, team;
+	private String myColor;
 	
-	private ServerSocket serverSocket;
-	private Handler updateConversationHandler;
-	private Thread serverThread = null;
-
-	public static final int SERVERPORT = 6000;
-
 	private final Context CONTEXT = this;
 	private final String KEY_USERNAME = "username";
 	private final String KEY_MATCH = "match";
 	private final String KEY_TEAM = "team";
-	private final String KEY_DEFAULT_OPPONENT_USERNAME = "opponent_username";
+	private final String KEY_LOBBY = "LOBBY";
+	private final String KEY_IAMIDLE = "IAMIDLE";
+	private final String KEY_IAMREADY = "IAMREADY";
+	private final String KEY_EMPTY_MATCH = "LOBBY-[]-[]";
+	private static final String KEY_CHANGEMYCOLOR 	= "CHANGEMYCOLOR";
+	private static final String KEY_CHANGETEAMCOLOR = "CHANGETEAMCOLOR";
+	
+    private Handler serviceHandler;
+	private SocketService mBoundService;
+	private Boolean mIsBound;
+	private ServiceConnection mConnection;
+	
+	private static final String KEY_GET_USERNAME	= "username: ";
+	private static final String KEY_USERNAME_AVAIL 	= "uname available!";
+	private static final String KEY_USERNAME_TAKEN 	= "uname taken";
+	private static final String KEY_MATCH_AVAIL 	= "available";
+	private static final String KEY_MATCH_FULL 		= "full";
+	private static final String KEY_TEAM_AVAIL 		= "team available";
+	private static final String KEY_TEAM_FULL 		= "team full";
+	private static final String KEY_INVALID			= "invalid";
+	private static final String KEY_READY_USER 		= "waiting for user ready...";
+	private static final String KEY_READY_MATCH 	= "waiting for match ready...";
+	private static final String KEY_START_GAME 		= "start game";
 	
     private static final int REQ_CAMERA_IMAGE = 123;
 	
@@ -51,64 +84,65 @@ public class HostLobbyActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_hostlobby);
+		initializeElements();
 		
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
-		    username = extras.getString(KEY_USERNAME);
-		} else {
-			username = "player_username";
+			username = extras.getString(KEY_USERNAME);
+			match = extras.getString(KEY_MATCH);
+			team = extras.getString(KEY_TEAM);
 		}
 		
-		initializeElements();
-		teammate1.setText(username);
-		
-		updateConversationHandler = new Handler();
-
-		this.serverThread = new Thread(new ServerThread());
-		this.serverThread.start();
+		startService(new Intent(CONTEXT, SocketService.class));
+        doBindService();
+        
 
 	}
 
 	private void initializeElements() {
-		teammate1 = (RadioButton) findViewById(R.id.rbHTeammate1);
-		opponent1 = (RadioButton) findViewById(R.id.rbHOpponent1);
-		teammate1.setClickable(false);
-		opponent1.setClickable(false);
+		result = new String();
+		message = new String();
+		username = new String();
+		match = new String();
+		
+		teamARg = (RadioGroup) findViewById(R.id.rgHTeamA);
+		teamBRg = (RadioGroup) findViewById(R.id.rgHTeamB);
+		
+		mBoundService = new SocketService();
+		mConnection = new ServiceConnection() {
+			@Override
+			public void onServiceConnected(ComponentName name, IBinder service) {
+				mBoundService = ((SocketService.LocalBinder)service).getService();
+				mBoundService.registerHandler(serviceHandler);
+			}
+			
+			@Override
+			public void onServiceDisconnected(ComponentName name) {
+			     mBoundService = null;
+			}
+		};
+		
+		serviceHandler = new Handler() {
+		    @Override
+		    public void handleMessage(Message msg) {
+		    	updateUI(msg);
+		    }
+		};
 	}
 
-	private void toggleReady() {
-		if (teammate1.isChecked()) {
-			teammate1.setChecked(false);
-		} else if (!teammate1.isChecked() ){
-			teammate1.setChecked(true);
-			checkForFlag();
+	private void toggleReady(RadioButton rb) {
+		if (rb.isChecked()) {
+        	mBoundService.sendMessage(KEY_IAMIDLE);
+			rb.setChecked(false);	
+			isReady = false;
+		} else if (!rb.isChecked() ){
+        	mBoundService.sendMessage(KEY_IAMREADY);
+			rb.setChecked(true);
+			isReady = true;
 		}
+		
 	}
 	
-	private void checkForFlag() {
-		if (teammate1.isChecked()
-			&& !opponent1.getText().toString().equals(KEY_DEFAULT_OPPONENT_USERNAME)
-			&& opponent1.isChecked()) {
-			/*
-			 try {
-			 
-				Class requestedClass = Class.forName("com.bitizen.camera.PreCameraActivity");
-				Intent newIntent = new Intent(CONTEXT, requestedClass);
-				startActivity(newIntent);
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			}
-			*/
-			Intent intent = new Intent(this, CameraActivity.class);
-	    	startActivityForResult(intent, REQ_CAMERA_IMAGE);
-
-			teammate1.setChecked(false);
-			opponent1.setChecked(false);
-		} else {
-			Toast.makeText(CONTEXT, "Some players still idle.", Toast.LENGTH_LONG).show();
-		}
-	}
-
 	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
@@ -121,9 +155,17 @@ public class HostLobbyActivity extends Activity {
         switch (item.getItemId()) {
         case R.id.mi_begin:
         	Toast.makeText(HostLobbyActivity.this, "Begin is Selected", Toast.LENGTH_SHORT).show();
-            toggleReady();
-            return true;
+    		toggleReady(myRb);
+        	return true;
 
+        case R.id.mi_setHSelfColor:
+        	popupColorDialog();
+        	return true;
+
+        case R.id.mi_setHTeamColor:
+        	popupTeamColorDialog();
+        	return true;
+        	
         case R.id.mi_quit:
         	Toast.makeText(HostLobbyActivity.this, "Quit is Selected", Toast.LENGTH_SHORT).show();
             return true;
@@ -137,80 +179,152 @@ public class HostLobbyActivity extends Activity {
         }
     }    
 	
+	private void popupColorDialog() {
+		final Dialog dialog = new Dialog(CONTEXT);
+	    dialog.setContentView(R.layout.dialog_changemycolor);
+	    dialog.setTitle("Select your color:");
+	    dialog.setCancelable(true);
 
-	@Override
-	protected void onStop() {
-		super.onStop();
-		try {
-			serverSocket.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	class ServerThread implements Runnable {
-		public void run() {
-			Socket socket = null;
-			try {
-				serverSocket = new ServerSocket(SERVERPORT);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			while (!Thread.currentThread().isInterrupted()) {
-				try {
-					socket = serverSocket.accept();
-
-					CommunicationThread commThread = new CommunicationThread(socket);
-					new Thread(commThread).start();
-				} catch (IOException e) {
-					e.printStackTrace();
+	    rgColors = (RadioGroup) dialog.findViewById(R.id.rgColors);
+	    rbRed = (RadioButton) dialog.findViewById(R.id.rbRed);
+	    rbBlue = (RadioButton) dialog.findViewById(R.id.rbBlue);
+	    rbOrange = (RadioButton) dialog.findViewById(R.id.rbOrange);
+	    rbYellow = (RadioButton) dialog.findViewById(R.id.rbYellow);
+	    rbGreen = (RadioButton) dialog.findViewById(R.id.rbGreen);
+	    setColorB = (Button) dialog.findViewById(R.id.bSetMyColor);
+	    
+	    setColorB.setOnClickListener(new OnClickListener() {
+	    	@Override
+            public void onClick(View v) {
+	    		int rbID = rgColors.getCheckedRadioButtonId();
+	    		
+				if (rbID > 0) {
+					RadioButton rb = (RadioButton) rgColors.findViewById(rbID);
+					myColor = rb.getText().toString();
+					
+		        	mBoundService.sendMessage(KEY_CHANGEMYCOLOR + "-" + myColor);
+		        	Toast.makeText(CONTEXT, myColor + " is now your color.", Toast.LENGTH_SHORT).show();
+					dialog.dismiss();
+					
+				} else {
+					Toast.makeText(CONTEXT, "Please select a color.", Toast.LENGTH_SHORT).show();
 				}
-			}
-		}
+	    	}
+	    });
+	    
+	    dialog.show();
 	}
 
-	class CommunicationThread implements Runnable {
+	private void popupTeamColorDialog() {
+		final Dialog dialog = new Dialog(CONTEXT);
+	    dialog.setContentView(R.layout.dialog_changeteamcolor);
+	    dialog.setTitle("Select Team Colors");
+	    dialog.setCancelable(true);
 
-		private Socket clientSocket;
-		private BufferedReader input;
+	    sTeamA = (Spinner) dialog.findViewById(R.id.sTeamAColor);
+	    sTeamB = (Spinner) dialog.findViewById(R.id.sTeamBColor);
+	    setTeamColorB = (Button) dialog.findViewById(R.id.bSetTeamColors);
+	    
+	    setTeamColorB.setOnClickListener(new OnClickListener() {
+	    	@Override
+            public void onClick(View v) {
 
-		public CommunicationThread(Socket clientSocket) {
-			this.clientSocket = clientSocket;
-
-			try {
-				this.input = new BufferedReader(new InputStreamReader(this.clientSocket.getInputStream()));
-			} catch (IOException e) {
-				e.printStackTrace();
+	    		Toast.makeText(CONTEXT, "A: " + String.valueOf(sTeamA.getSelectedItem())
+	    				+ "|| B: " + String.valueOf(sTeamB.getSelectedItem())
+	    				+ " ", Toast.LENGTH_SHORT).show();
+	    		mBoundService.sendMessage(KEY_CHANGETEAMCOLOR 
+	    				+ "-" + String.valueOf(sTeamA.getSelectedItem())
+	    				+ String.valueOf(sTeamB.getSelectedItem()));
+		        dialog.dismiss();
+					
 			}
-		}
-
-		public void run() {
-			while (!Thread.currentThread().isInterrupted()) {
-				try {
-					String read = input.readLine();
-
-					updateConversationHandler.post(new updateUIThread(read));
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-
-	}
-
-	class updateUIThread implements Runnable {
-		private String opponentUsername;
-
-		public updateUIThread(String str) {
-			this.opponentUsername = str;
-		}
-
-		@Override
-		public void run() {
-			opponent1.setText(opponentUsername);
-		}
+	    });
+	    
+	    dialog.show();
 	}
 	
+	private void updateUI(Message msg) {
+    	String str = msg.obj.toString();
+    	
+    	if (str.equalsIgnoreCase(KEY_START_GAME)) {
+    		Intent newIntent = new Intent(CONTEXT, CameraActivity.class);
+        	Bundle extras = new Bundle();
+			extras.putString(KEY_USERNAME, username);
+			extras.putString(KEY_MATCH, match);
+			extras.putString(KEY_TEAM, team);
+			newIntent.putExtras(extras);
+			startActivity(newIntent);
+    	}
+    	// LOBBY-[]-[]
+    	if (!str.equalsIgnoreCase(KEY_EMPTY_MATCH)) {
+		    /*
+    		String[] list = str.replaceAll("[\\:\\[\\]]+", "").split("[\\-]+");
+		    System.out.println("0: " + list[0]);
+		    System.out.println("1: " + list[1]);
+		    System.out.println("2: " + list[2]);
+		    if (list[1] != null && list[0].equalsIgnoreCase(KEY_LOBBY)) {
+		    	String[] listA = list[1].split("[,\\s]+");
+			    createRadioButtons(teamARg, listA);
+		    }
+		    
+		    if (list[2] != null && list[0].equalsIgnoreCase(KEY_LOBBY)) {
+		    	String[] listB = list[2].split("[,\\s]+");
+			    createRadioButtons(teamBRg, listB);
+		    }
+		    */
+    	} else {
+    		Toast.makeText(CONTEXT, "No other players detected.", Toast.LENGTH_SHORT).show();
+    	}
+    }
+    
+    private void createRadioButtons(RadioGroup r, String[] l) {
+    	int number = l.length;
+    	final RadioButton[] rb = new RadioButton[number];
+        
+    	r.removeAllViews();
+    	
+        for(int i=1; i<number; i++){
+            rb[i]  = new RadioButton(this);
+            rb[i].setText(l[i]);
+            rb[i].setClickable(false);
+            rb[i].setTextSize(15.0f);
+            LinearLayout.LayoutParams params = new LinearLayout
+            		.LayoutParams(LayoutParams.MATCH_PARENT
+            		, LayoutParams.MATCH_PARENT, Gravity.TOP);
+            params.setMargins(80,5,5,5);
+            rb[i].setLayoutParams(params);
+            r.addView(rb[i]);
+            
+        	if (l[i].equalsIgnoreCase(username)) {
+        		myRb = rb[i];
+        	}
+        	
+        }
+    }
+    
+	private void doBindService() {
+	   bindService(new Intent(CONTEXT, SocketService.class), mConnection, Context.BIND_AUTO_CREATE);
+	   mIsBound = true;
+	   if(mBoundService != null){
+		   mBoundService.IsBoundable();
+	   } else {
+		   System.out.println("NOT BOUNDABLE");
+	   }
+	}
+
+	private void doUnbindService() {
+	   if (mIsBound) {
+	       unbindService(mConnection);
+	       mIsBound = false;
+	   }
+	}
+	
+	@Override
+	protected void onDestroy() {
+	    super.onDestroy();
+	    doUnbindService();
+	}
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		/*
@@ -230,6 +344,4 @@ public class HostLobbyActivity extends Activity {
 		//imageView.setImageBitmap(BitmapHelper.decodeSampledBitmap(path, 300, 250));
 	}
 	
-	
-	
-}
+} // end of class

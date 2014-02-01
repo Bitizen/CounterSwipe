@@ -20,14 +20,13 @@
         android:layout_gravity="center"
         android:layout_marginTop="25sp"
         android:text="Team A" />
-
-    <RadioButton
-        android:id="@+id/rbHTeammate1"
+ 	
+ 	<RadioGroup
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="15sp"
-        android:layout_marginLeft="80sp"
-        android:text="player_username" />
+        android:id="@+id/rgHTeamA" >
+   	
+    </RadioGroup>
     
     <TextView
         android:layout_width="wrap_content"
@@ -37,13 +36,12 @@
         android:layout_marginTop="25sp"
         android:text="Team B" />
     
-    <RadioButton
-        android:id="@+id/rbHOpponent1"
+ 	<RadioGroup
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="15sp"
-        android:layout_marginLeft="80sp"
-        android:text="opponent_username" />
+        android:id="@+id/rgHTeamB" >
+   	
+    </RadioGroup>
     
 
 </LinearLayout>

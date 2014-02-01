@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import com.bitizen.camera.CameraActivity;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -25,6 +26,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -36,11 +38,14 @@ import android.widget.Toast;
 public class LobbyActivity extends Activity {
 
 	private RadioButton myRb;
-	private RadioGroup teamARg, teamBRg;
+	private RadioButton rbRed, rbBlue, rbGreen, rbYellow, rbOrange;
+	private RadioGroup teamARg, teamBRg, rgColors;
+	private Button setColorB;
 
 	private Boolean isReady = false;
 	private String result;
 	private String message;
+	private String myColor;
 	private String username, match, team;
 	
 	private final Context CONTEXT = this;
@@ -50,6 +55,8 @@ public class LobbyActivity extends Activity {
 	private final String KEY_LOBBY = "LOBBY";
 	private final String KEY_IAMIDLE = "IAMIDLE";
 	private final String KEY_IAMREADY = "IAMREADY";
+	private final String KEY_EMPTY_MATCH = "LOBBY-[]-[]";
+	private final String KEY_CHANGEMYCOLOR = "CHANGEMYCOLOR";
 	
     private Handler serviceHandler;
 	private SocketService mBoundService;
@@ -84,7 +91,7 @@ public class LobbyActivity extends Activity {
 		startService(new Intent(CONTEXT, SocketService.class));
         doBindService();
         
-		//new Thread(new CheckerThread()).start();
+		new Thread(new CheckerThread()).start();
 	}
 	
 	private void initializeElements() {
@@ -92,6 +99,7 @@ public class LobbyActivity extends Activity {
 		message = new String();
 		username = new String();
 		match = new String();
+		myColor = new String();
 		
 		teamARg = (RadioGroup) findViewById(R.id.rgTeamA);
 		teamBRg = (RadioGroup) findViewById(R.id.rgTeamB);
@@ -181,74 +189,124 @@ public class LobbyActivity extends Activity {
 	            //Toast.makeText(LobbyActivity.this, "Ready is Selected", Toast.LENGTH_SHORT).show();
 	        	toggleReady(myRb);
 	            return true;
+	        case R.id.mi_setSelfColor:
+	        	popupColorDialog();
+	        	return true;
 	        default:
 	            return super.onOptionsItemSelected(item);
         }
     }    
 	
-	 private void updateUI(Message msg) {
-	    	String str = msg.obj.toString();
-	    	
-	    	// LOBBY-[]-[]
+	private void popupColorDialog() {
+		final Dialog dialog = new Dialog(CONTEXT);
+	    dialog.setContentView(R.layout.dialog_changemycolor);
+	    dialog.setTitle("Select your color:");
+	    dialog.setCancelable(true);
 
-		    String[] list = str.replaceAll("[\\:\\[\\]]+", "").split("[\\-]+");
-		    if (list[1] != null && list[0].equalsIgnoreCase(KEY_LOBBY)) {
+	    rgColors = (RadioGroup) dialog.findViewById(R.id.rgColors);
+	    rbRed = (RadioButton) dialog.findViewById(R.id.rbRed);
+	    rbBlue = (RadioButton) dialog.findViewById(R.id.rbBlue);
+	    rbOrange = (RadioButton) dialog.findViewById(R.id.rbOrange);
+	    rbYellow = (RadioButton) dialog.findViewById(R.id.rbYellow);
+	    rbGreen = (RadioButton) dialog.findViewById(R.id.rbGreen);
+	    setColorB = (Button) dialog.findViewById(R.id.bSetMyColor);
+	    
+	    setColorB.setOnClickListener(new OnClickListener() {
+	    	@Override
+            public void onClick(View v) {
+	    		int rbID = rgColors.getCheckedRadioButtonId();
+	    		
+				if (rbID > 0) {
+					RadioButton rb = (RadioButton) rgColors.findViewById(rbID);
+					myColor = rb.getText().toString();
+					
+		        	mBoundService.sendMessage(KEY_CHANGEMYCOLOR + "-" + myColor);
+		        	Toast.makeText(CONTEXT, myColor + " is now your color.", Toast.LENGTH_SHORT).show();
+					dialog.dismiss();
+					
+				} else {
+					Toast.makeText(CONTEXT, "Please select a color.", Toast.LENGTH_SHORT).show();
+				}
+	    	}
+	    });
+	    
+	    dialog.show();
+	}
+	
+	private void updateUI(Message msg) {
+	    String str = msg.obj.toString();
+	    	
+    	if (str.equalsIgnoreCase(KEY_START_GAME)) {
+    		Intent newIntent = new Intent(CONTEXT, CameraActivity.class);
+        	Bundle extras = new Bundle();
+			extras.putString(KEY_USERNAME, username);
+			extras.putString(KEY_MATCH, match);
+			extras.putString(KEY_TEAM, team);
+			newIntent.putExtras(extras);
+			startActivity(newIntent);
+    	}
+    	// LOBBY-[]-[]
+    	if (!str.equalsIgnoreCase(KEY_EMPTY_MATCH)) {
+		    /*
+		    if (list[0].equalsIgnoreCase(KEY_LOBBY)) {
 		    	String[] listA = list[1].split("[,\\s]+");
 			    createRadioButtons(teamARg, listA);
-		    }
-		    
-		    if (list[2] != null && list[0].equalsIgnoreCase(KEY_LOBBY)) {
+		 
 		    	String[] listB = list[2].split("[,\\s]+");
 			    createRadioButtons(teamBRg, listB);
 		    }
-	    }
+		    */
+    	} else {
+    		Toast.makeText(CONTEXT, "No other players detected.", Toast.LENGTH_SHORT).show();
+    	}
+    }
 	    
-	    private void createRadioButtons(RadioGroup r, String[] l) {
-	    	int number = l.length;
-	    	final RadioButton[] rb = new RadioButton[number];
-	        
-	    	r.removeAllViews();
-	    	
-	        for(int i=1; i<number; i++){
-	            rb[i]  = new RadioButton(this);
-	            rb[i].setText(l[i]);
-	            rb[i].setClickable(false);
-	            rb[i].setTextSize(15.0f);
-	            LinearLayout.LayoutParams params = new LinearLayout
-	            		.LayoutParams(LayoutParams.MATCH_PARENT
-	            		, LayoutParams.MATCH_PARENT, Gravity.TOP);
-	            params.setMargins(80,5,5,5);
-	            rb[i].setLayoutParams(params);
-	            r.addView(rb[i]);
-	            
-	        	if (l[i].equalsIgnoreCase(username)) {
-	        		myRb = rb[i];
-	        	}
-	        	
-	        }
-	    }
-	    
-		private void doBindService() {
-		   bindService(new Intent(CONTEXT, SocketService.class), mConnection, Context.BIND_AUTO_CREATE);
-		   mIsBound = true;
-		   if(mBoundService != null){
-			   mBoundService.IsBoundable();
-		   } else {
-			   System.out.println("NOT BOUNDABLE");
-		   }
-		}
+    private void createRadioButtons(RadioGroup r, String[] l) {
+    	int number = l.length;
+    	final RadioButton[] rb = new RadioButton[number];
+        
+    	r.removeAllViews();
+    	
+        for(int i=1; i<number; i++){
+            rb[i]  = new RadioButton(this);
+            rb[i].setText(l[i]);
+            rb[i].setClickable(false);
+            rb[i].setTextSize(15.0f);
+            LinearLayout.LayoutParams params = new LinearLayout
+            		.LayoutParams(LayoutParams.MATCH_PARENT
+            		, LayoutParams.MATCH_PARENT, Gravity.TOP);
+            params.setMargins(80,5,5,5);
+            rb[i].setLayoutParams(params);
+            r.addView(rb[i]);
+            
+        	if (l[i].equalsIgnoreCase(username)) {
+        		myRb = rb[i];
+        	}
+        	
+        }
+    }
+    
+	private void doBindService() {
+	   bindService(new Intent(CONTEXT, SocketService.class), mConnection, Context.BIND_AUTO_CREATE);
+	   mIsBound = true;
+	   if(mBoundService != null){
+		   mBoundService.IsBoundable();
+	   } else {
+		   System.out.println("NOT BOUNDABLE");
+	   }
+	}
 
-		private void doUnbindService() {
-		   if (mIsBound) {
-		       unbindService(mConnection);
-		       mIsBound = false;
-		   }
-		}
-		
-		@Override
-		protected void onDestroy() {
-		    super.onDestroy();
-		    doUnbindService();
-		}
+	private void doUnbindService() {
+	   if (mIsBound) {
+	       unbindService(mConnection);
+	       mIsBound = false;
+	   }
+	}
+	
+	@Override
+	protected void onDestroy() {
+	    super.onDestroy();
+	    doUnbindService();
+	}
 	
 } // end of class

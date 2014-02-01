@@ -20,6 +20,7 @@ import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 public class CameraActivity extends Activity implements PictureCallback {
 
@@ -59,16 +60,20 @@ public class CameraActivity extends Activity implements PictureCallback {
 
 	@FromXML
 	public void onMenuClick(View button){
-		Intent intent = new Intent(this, ResultsActivity.class);
-    	startActivity(intent);
+		//Intent intent = new Intent(this, ResultsActivity.class);
+    	//startActivity(intent);
+		Toast.makeText(CONTEXT, "Menu selected.", Toast.LENGTH_SHORT).show();
 	}
 	
 	@Override
 	public void onPictureTaken(byte[] data, Camera camera) {
-		Log.d("Picture taken");
+		/*Log.d("Picture taken");
 		String path = savePictureToFileSystem(data);
 		setResult(path);
 		finish();
+		*/
+
+		Toast.makeText(CONTEXT, "Hit test.", Toast.LENGTH_SHORT).show();
 	}
 
 	private static String savePictureToFileSystem(byte[] data) {

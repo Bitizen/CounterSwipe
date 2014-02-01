@@ -30,6 +30,10 @@ public class LoginActivity extends Activity implements View.OnClickListener{
 
 	private final Context CONTEXT = this; 
 	private final String KEY_USERNAME = "username";
+	private final String KEY_MATCH = "match";
+	private final String KEY_TEAM = "team";
+	private final String KEY_IAMHOST = "HOST-";
+	private final String KEY_IAMREG = "REG-";
 	
 	private static final String KEY_GET_USERNAME	= "username: ";
 	private static final String KEY_USERNAME_AVAIL 	= "uname available!";
@@ -42,6 +46,8 @@ public class LoginActivity extends Activity implements View.OnClickListener{
 	private static final String KEY_READY_USER 		= "waiting for user ready...";
 	private static final String KEY_READY_MATCH 	= "waiting for match ready...";
 	private static final String KEY_START_GAME 		= "start game";
+	private static final String KEY_HOST_AVAIL 		= "host ok";
+	
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -95,14 +101,16 @@ public class LoginActivity extends Activity implements View.OnClickListener{
 				message = usernameEt.getText().toString(); 
 				
 				if (mBoundService != null) {
-				    mBoundService.sendMessage(message);
+				    mBoundService.sendMessage(KEY_IAMREG + message);
 				}
 				break;
 				
 			case R.id.btnHost:
-				//newIntent = new Intent(CONTEXT, HostLobbyActivity.class);
-				//newIntent.putExtra(KEY_USERNAME, usernameEt.getText().toString());
-				//startActivity(newIntent);
+				message = usernameEt.getText().toString(); 
+				
+				if (mBoundService != null) {
+				    mBoundService.sendMessage(KEY_IAMHOST + message);
+				}
 				break;
 		}
 	}
@@ -111,7 +119,15 @@ public class LoginActivity extends Activity implements View.OnClickListener{
     	this.result = msg.obj.toString();
     	System.out.println("R: " + result);
     	
-    	if (result.equalsIgnoreCase(KEY_USERNAME_AVAIL)) {
+    	if (result.equalsIgnoreCase(KEY_HOST_AVAIL)) {
+        	Intent newIntent = new Intent(CONTEXT, HostLobbyActivity.class);
+			Bundle extras = new Bundle();
+			extras.putString(KEY_USERNAME, message);
+			extras.putString(KEY_MATCH, message);
+			extras.putString(KEY_TEAM, "A");
+			newIntent.putExtras(extras);
+			startActivity(newIntent);
+    	} else if (result.equalsIgnoreCase(KEY_USERNAME_AVAIL)) {
         	Intent newIntent = new Intent(CONTEXT, AvailableMatchesActivity.class);
 			newIntent.putExtra(KEY_USERNAME, message);
 			startActivity(newIntent);

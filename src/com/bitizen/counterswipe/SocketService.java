@@ -37,7 +37,7 @@ public class SocketService extends Service {
 	private final IBinder myBinder = new LocalBinder();
 	//private TCPClient mTcpClient = new TCPClient();
 	private static final int SERVERPORT = 5559;
-	private static final String SERVERIP = "192.168.0.16";   
+	private static final String SERVERIP = "10.0.2.24";   
 	private final int IDENTIFIER = 1;
 
 	@Override
