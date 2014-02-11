@@ -20,4 +20,7 @@
 		<item>GREEN</item>
     </string-array>
 	
+    <string name="overlay">overlay_desc</string>
+    <string name="action_settings">Settings</string>
+    
 </resources>

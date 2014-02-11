@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import com.bitizen.camera.CameraActivity;
+import com.bitizen.camera.CSCameraActivity;
 import com.bitizen.camera.util.BitmapHelper;
 import com.bitizen.camera.util.Log;
 
@@ -247,7 +247,7 @@ public class HostLobbyActivity extends Activity {
     	String str = msg.obj.toString();
     	
     	if (str.equalsIgnoreCase(KEY_START_GAME)) {
-    		Intent newIntent = new Intent(CONTEXT, CameraActivity.class);
+    		Intent newIntent = new Intent(CONTEXT, CSCameraActivity.class);
         	Bundle extras = new Bundle();
 			extras.putString(KEY_USERNAME, username);
 			extras.putString(KEY_MATCH, match);
