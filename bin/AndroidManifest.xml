@@ -7,17 +7,30 @@
     <uses-sdk
         android:minSdkVersion="14"
         android:targetSdkVersion="16" />
-	<uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    
+	<supports-screens android:resizeable="true"
+                      android:smallScreens="true"
+                      android:normalScreens="true"
+                      android:largeScreens="true"
+                      android:anyDensity="true" />
+        
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false"/>
+    <uses-feature android:name="android.hardware.camera.front" android:required="false"/>
+    <uses-feature android:name="android.hardware.camera.front.autofocus" android:required="false"/>
     
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-        
+        <service
+			android:name="SocketService"
+		  	android:icon="@drawable/ic_launcher"
+		  	android:label="socket_service" >
+		</service> 
+	
         <activity
             android:name="com.bitizen.counterswipe.LoginActivity"
             android:label="@string/app_name" 
@@ -54,14 +67,8 @@
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.NoTitleBar" />
      	
-        <activity
-            android:name="com.bitizen.camera.PreCameraActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="landscape"
-            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />
-     	
      	<activity
-            android:name="com.bitizen.camera.CameraActivity"
+            android:name="com.bitizen.camera.CSCameraActivity"
             android:label="@string/app_name"
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />

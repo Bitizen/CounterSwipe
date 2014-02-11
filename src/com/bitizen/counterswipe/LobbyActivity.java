@@ -9,7 +9,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
-import com.bitizen.camera.CameraActivity;
+import com.bitizen.camera.CSCameraActivity;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -237,7 +237,7 @@ public class LobbyActivity extends Activity {
 	    String str = msg.obj.toString();
 	    	
     	if (str.equalsIgnoreCase(KEY_START_GAME)) {
-    		Intent newIntent = new Intent(CONTEXT, CameraActivity.class);
+    		Intent newIntent = new Intent(CONTEXT, CSCameraActivity.class);
         	Bundle extras = new Bundle();
 			extras.putString(KEY_USERNAME, username);
 			extras.putString(KEY_MATCH, match);
