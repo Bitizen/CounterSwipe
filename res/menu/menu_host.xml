@@ -6,13 +6,8 @@
           android:numericShortcut="1"
           android:alphabeticShortcut="a"
         />
-        <item android:id="@+id/mi_setHSelfColor"
-          android:title="SET COLOR"
-          android:numericShortcut="4"
-          android:alphabeticShortcut="d"
-        />
-        <item android:id="@+id/mi_setHTeamColor"
-          android:title="SET TEAM COLOR"
+        <item android:id="@+id/mi_setHSelfMarker"
+          android:title="SET MARKER"
           android:numericShortcut="4"
           android:alphabeticShortcut="d"
         />
@@ -20,10 +15,5 @@
           android:title="@string/quit_item"
           android:numericShortcut="2"
           android:alphabeticShortcut="b"
-        />
-   		<item android:id="@+id/mi_kick"
-          android:title="@string/kick_item"
-          android:numericShortcut="3"
-          android:alphabeticShortcut="c"
         />
     </menu>

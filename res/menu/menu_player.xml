@@ -5,8 +5,8 @@
           android:numericShortcut="1"
           android:alphabeticShortcut="a"
         />
-        <item android:id="@+id/mi_setSelfColor"
-          android:title="SET COLOR"
+        <item android:id="@+id/mi_setSelfMarker"
+          android:title="SET MARKER"
           android:numericShortcut="2"
           android:alphabeticShortcut="b"
         />

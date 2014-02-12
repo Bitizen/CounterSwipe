@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:id="@+id/dlChangeMyMarker" >
+    
+    <RadioGroup
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/rgMarkers" >
+   	
+        <LinearLayout
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:orientation="horizontal" >
+		<RadioButton
+	        android:id="@+id/rbM1"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content" />
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/m1" />
+    	</LinearLayout>
+        <LinearLayout
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:orientation="horizontal" >
+		<RadioButton
+	        android:id="@+id/rbM2"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content" />
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/m2" />
+    	</LinearLayout>
+        <LinearLayout
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:orientation="horizontal" >
+		<RadioButton
+	        android:id="@+id/rbM3"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content" />
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/m3" />
+    	</LinearLayout>
+        <LinearLayout
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:orientation="horizontal" >
+		<RadioButton
+	        android:id="@+id/rbM4"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content" />
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/m4" />
+    	</LinearLayout>
+        <LinearLayout
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:orientation="horizontal" >
+		<RadioButton
+	        android:id="@+id/rbM5"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content" />
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/m5" />
+    	</LinearLayout>
+        <LinearLayout
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:orientation="horizontal" >
+		<RadioButton
+	        android:id="@+id/rbM6"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content" />
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/m6" />
+    	</LinearLayout>
+    </RadioGroup>
+    
+    <Button
+        android:id="@+id/bSetMyMarker"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="SET" />
+    
+</LinearLayout>

@@ -38,14 +38,14 @@ import android.widget.Toast;
 public class LobbyActivity extends Activity {
 
 	private RadioButton myRb;
-	private RadioButton rbRed, rbBlue, rbGreen, rbYellow, rbOrange;
-	private RadioGroup teamARg, teamBRg, rgColors;
-	private Button setColorB;
+	private RadioButton rbM1, rbM2, rbM3, rbM4, rbM5, rbM6;
+	private RadioGroup teamARg, teamBRg, rgMarkers;
+	private Button setMarkerB;
 
 	private Boolean isReady = false;
 	private String result;
 	private String message;
-	private String myColor;
+	private String myMarker;
 	private String username, match, team;
 	
 	private final Context CONTEXT = this;
@@ -56,7 +56,7 @@ public class LobbyActivity extends Activity {
 	private final String KEY_IAMIDLE = "IAMIDLE";
 	private final String KEY_IAMREADY = "IAMREADY";
 	private final String KEY_EMPTY_MATCH = "LOBBY-[]-[]";
-	private final String KEY_CHANGEMYCOLOR = "CHANGEMYCOLOR";
+	private final String KEY_CHANGEMYMARKER = "CHANGEMYMARKER";
 	
     private Handler serviceHandler;
 	private SocketService mBoundService;
@@ -99,7 +99,7 @@ public class LobbyActivity extends Activity {
 		message = new String();
 		username = new String();
 		match = new String();
-		myColor = new String();
+		myMarker = new String();
 		
 		teamARg = (RadioGroup) findViewById(R.id.rgTeamA);
 		teamBRg = (RadioGroup) findViewById(R.id.rgTeamB);
@@ -189,43 +189,44 @@ public class LobbyActivity extends Activity {
 	            //Toast.makeText(LobbyActivity.this, "Ready is Selected", Toast.LENGTH_SHORT).show();
 	        	toggleReady(myRb);
 	            return true;
-	        case R.id.mi_setSelfColor:
-	        	popupColorDialog();
+	        case R.id.mi_setSelfMarker:
+	        	popupMarkerDialog();
 	        	return true;
 	        default:
 	            return super.onOptionsItemSelected(item);
         }
     }    
 	
-	private void popupColorDialog() {
+	private void popupMarkerDialog() {
 		final Dialog dialog = new Dialog(CONTEXT);
-	    dialog.setContentView(R.layout.dialog_changemycolor);
-	    dialog.setTitle("Select your color:");
+	    dialog.setContentView(R.layout.dialog_changemymarker);
+	    dialog.setTitle("Select your marker:");
 	    dialog.setCancelable(true);
 
-	    rgColors = (RadioGroup) dialog.findViewById(R.id.rgColors);
-	    rbRed = (RadioButton) dialog.findViewById(R.id.rbRed);
-	    rbBlue = (RadioButton) dialog.findViewById(R.id.rbBlue);
-	    rbOrange = (RadioButton) dialog.findViewById(R.id.rbOrange);
-	    rbYellow = (RadioButton) dialog.findViewById(R.id.rbYellow);
-	    rbGreen = (RadioButton) dialog.findViewById(R.id.rbGreen);
-	    setColorB = (Button) dialog.findViewById(R.id.bSetMyColor);
+	    rgMarkers = (RadioGroup) dialog.findViewById(R.id.rgMarkers);
+	    rbM1 = (RadioButton) dialog.findViewById(R.id.rbM1);
+	    rbM2 = (RadioButton) dialog.findViewById(R.id.rbM2);
+	    rbM3 = (RadioButton) dialog.findViewById(R.id.rbM3);
+	    rbM4 = (RadioButton) dialog.findViewById(R.id.rbM4);
+	    rbM5 = (RadioButton) dialog.findViewById(R.id.rbM5);
+	    rbM6 = (RadioButton) dialog.findViewById(R.id.rbM6);
+	    setMarkerB = (Button) dialog.findViewById(R.id.bSetMyMarker);
 	    
-	    setColorB.setOnClickListener(new OnClickListener() {
+	    setMarkerB.setOnClickListener(new OnClickListener() {
 	    	@Override
             public void onClick(View v) {
-	    		int rbID = rgColors.getCheckedRadioButtonId();
+	    		int rbID = rgMarkers.getCheckedRadioButtonId();
 	    		
 				if (rbID > 0) {
-					RadioButton rb = (RadioButton) rgColors.findViewById(rbID);
-					myColor = rb.getText().toString();
+					RadioButton rb = (RadioButton) rgMarkers.findViewById(rbID);
+					myMarker = rb.getText().toString();
 					
-		        	mBoundService.sendMessage(KEY_CHANGEMYCOLOR + "-" + myColor);
-		        	Toast.makeText(CONTEXT, myColor + " is now your color.", Toast.LENGTH_SHORT).show();
+		        	mBoundService.sendMessage(KEY_CHANGEMYMARKER + "-" + myMarker);
+		        	Toast.makeText(CONTEXT, myMarker + " is now your marker.", Toast.LENGTH_SHORT).show();
 					dialog.dismiss();
 					
 				} else {
-					Toast.makeText(CONTEXT, "Please select a color.", Toast.LENGTH_SHORT).show();
+					Toast.makeText(CONTEXT, "Please select a marker.", Toast.LENGTH_SHORT).show();
 				}
 	    	}
 	    });
@@ -245,17 +246,18 @@ public class LobbyActivity extends Activity {
 			newIntent.putExtras(extras);
 			startActivity(newIntent);
     	}
+    	
     	// LOBBY-[]-[]
     	if (!str.equalsIgnoreCase(KEY_EMPTY_MATCH)) {
-		    /*
+    		String[] list = str.replaceAll("[\\:\\[\\]]+", "").split("[\\-]+");
+		    
 		    if (list[0].equalsIgnoreCase(KEY_LOBBY)) {
-		    	String[] listA = list[1].split("[,\\s]+");
+			    String[] listA = list[1].split("[,\\s]+");
+			    String[] listB = list[2].split("[,\\s]+");
+			
 			    createRadioButtons(teamARg, listA);
-		 
-		    	String[] listB = list[2].split("[,\\s]+");
 			    createRadioButtons(teamBRg, listB);
 		    }
-		    */
     	} else {
     		Toast.makeText(CONTEXT, "No other players detected.", Toast.LENGTH_SHORT).show();
     	}
