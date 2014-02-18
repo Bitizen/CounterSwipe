@@ -18,28 +18,31 @@
 
     <EditText
         android:id="@+id/etUsername"
+        android:layout_marginTop="10dp"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter Username"
+        android:hint="ENTER USERNAME"
         android:password="false"
         android:ems="10" >
-        <requestFocus />
+	    <requestFocus />
+	    
     </EditText>
-
     <Button
         android:id="@+id/btnJoin"
         android:layout_width="108dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="60dp"
         android:layout_gravity="center"
-        android:text="Join"
+        android:text="JOIN"
         android:padding="10dp" />
 
     <Button
         android:id="@+id/btnHost"
         android:layout_width="108dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:layout_gravity="center"
-        android:text="Host"
+        android:text="HOST"
         android:padding="10dp" />
 
 </LinearLayout>

@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import com.bitizen.R;
 import com.bitizen.camera.CSCameraActivity;
 import com.bitizen.camera.util.BitmapHelper;
 import com.bitizen.camera.util.Log;
@@ -299,25 +300,6 @@ public class HostLobbyActivity extends Activity {
 	protected void onDestroy() {
 	    super.onDestroy();
 	    doUnbindService();
-	}
-
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		/*
-		if(requestCode == REQ_CAMERA_IMAGE && resultCode == RESULT_OK){
-			String imgPath = data.getStringExtra(CameraActivity.EXTRA_IMAGE_PATH);
-			Log.i("Got image path: "+ imgPath);
-			displayImage(imgPath);
-		} else
-		if(requestCode == REQ_CAMERA_IMAGE && resultCode == RESULT_CANCELED){
-			Log.i("User didn't take an image");
-		}
-		*/
-	}
-
-	private void displayImage(String path) {
-		//ImageView imageView = (ImageView) findViewById(R.id.image_view_captured_image);
-		//imageView.setImageBitmap(BitmapHelper.decodeSampledBitmap(path, 300, 250));
 	}
 	
 } // end of class

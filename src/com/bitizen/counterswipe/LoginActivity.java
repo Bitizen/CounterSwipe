@@ -1,5 +1,7 @@
 package com.bitizen.counterswipe;
 
+import com.bitizen.R;
+
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -35,17 +37,10 @@ public class LoginActivity extends Activity implements View.OnClickListener{
 	private final String KEY_IAMHOST = "HOST-";
 	private final String KEY_IAMREG = "REG-";
 	
+	private static final String KEY_ERR_CONNECT		= "server conn error";
 	private static final String KEY_GET_USERNAME	= "username: ";
 	private static final String KEY_USERNAME_AVAIL 	= "uname available!";
 	private static final String KEY_USERNAME_TAKEN 	= "uname taken";
-	private static final String KEY_MATCH_AVAIL 	= "match available";
-	private static final String KEY_MATCH_FULL 		= "match full";
-	private static final String KEY_TEAM_AVAIL 		= "team available";
-	private static final String KEY_TEAM_FULL 		= "team full";
-	private static final String KEY_INVALID			= "invalid";
-	private static final String KEY_READY_USER 		= "waiting for user ready...";
-	private static final String KEY_READY_MATCH 	= "waiting for match ready...";
-	private static final String KEY_START_GAME 		= "start game";
 	private static final String KEY_HOST_AVAIL 		= "host ok";
 	
 	
@@ -134,7 +129,9 @@ public class LoginActivity extends Activity implements View.OnClickListener{
         } else if (result.equalsIgnoreCase(KEY_USERNAME_TAKEN)) {
         	Toast.makeText(CONTEXT, "Username already exists.", Toast.LENGTH_SHORT).show();
         } else if (result.equalsIgnoreCase(KEY_GET_USERNAME)) {
-        	System.out.println("ERR: Problem with result.");
+        	Toast.makeText(CONTEXT, "Please try again.", Toast.LENGTH_SHORT).show();
+        } else if (result.equalsIgnoreCase(KEY_ERR_CONNECT)) {
+        	Toast.makeText(CONTEXT, "Problem with server connection.", Toast.LENGTH_SHORT).show();
         }
     }
     

@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
+import com.bitizen.R;
 import com.bitizen.camera.CSCameraActivity;
 
 import android.app.Activity;
@@ -42,7 +43,6 @@ public class LobbyActivity extends Activity {
 	private RadioGroup teamARg, teamBRg, rgMarkers;
 	private Button setMarkerB;
 
-	private Boolean isReady = false;
 	private String result;
 	private String message;
 	private String myMarker;
@@ -55,7 +55,7 @@ public class LobbyActivity extends Activity {
 	private final String KEY_LOBBY = "LOBBY";
 	private final String KEY_IAMIDLE = "IAMIDLE";
 	private final String KEY_IAMREADY = "IAMREADY";
-	private final String KEY_EMPTY_MATCH = "LOBBY-[]-[]";
+	private final String KEY_EMPTY_MATCH = "[]";
 	private final String KEY_CHANGEMYMARKER = "CHANGEMYMARKER";
 	
     private Handler serviceHandler;
@@ -91,7 +91,7 @@ public class LobbyActivity extends Activity {
 		startService(new Intent(CONTEXT, SocketService.class));
         doBindService();
         
-		new Thread(new CheckerThread()).start();
+		//new Thread(new CheckerThread()).start();
 	}
 	
 	private void initializeElements() {
@@ -130,11 +130,12 @@ public class LobbyActivity extends Activity {
 			@Override
 			public void run() {
 				try {
-					this.sleep(2000);
+					this.sleep(300);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				} finally {
-					mBoundService.sendMessage("NEXT");
+					//mBoundService.sendMessage("NEXT");
+					checkForFlag();
 				}
 				super.run();
 			}
@@ -142,6 +143,7 @@ public class LobbyActivity extends Activity {
 		buffer.start();
 	}
 	
+	/*
 	class CheckerThread implements Runnable {
 		 @Override
 		public void run() {
@@ -154,18 +156,20 @@ public class LobbyActivity extends Activity {
 			}
 		}
 	}
+	*/
 	
 	private void toggleReady(RadioButton rb) {
-		if (rb.isChecked()) {
-        	mBoundService.sendMessage(KEY_IAMIDLE);
-			rb.setChecked(false);	
-			isReady = false;
-		} else if (!rb.isChecked() ){
-        	mBoundService.sendMessage(KEY_IAMREADY);
-			rb.setChecked(true);
-			isReady = true;
+		try {
+			if (rb.isChecked()) {
+				rb.setChecked(false);	
+	        	mBoundService.sendMessage(KEY_IAMIDLE);
+			} else if (!rb.isChecked() ){
+				rb.setChecked(true);
+	        	mBoundService.sendMessage(KEY_IAMREADY);
+			}
+		} catch (NullPointerException e) {
+			
 		}
-		
 	}
 	
 	private void checkForFlag() {
@@ -188,6 +192,7 @@ public class LobbyActivity extends Activity {
 	        case R.id.mi_ready:
 	            //Toast.makeText(LobbyActivity.this, "Ready is Selected", Toast.LENGTH_SHORT).show();
 	        	toggleReady(myRb);
+	        	checkForFlag();
 	            return true;
 	        case R.id.mi_setSelfMarker:
 	        	popupMarkerDialog();
@@ -239,7 +244,7 @@ public class LobbyActivity extends Activity {
 	    	
     	if (str.equalsIgnoreCase(KEY_START_GAME)) {
     		Intent newIntent = new Intent(CONTEXT, CSCameraActivity.class);
-        	Bundle extras = new Bundle();
+    		Bundle extras = new Bundle();
 			extras.putString(KEY_USERNAME, username);
 			extras.putString(KEY_MATCH, match);
 			extras.putString(KEY_TEAM, team);
@@ -247,8 +252,8 @@ public class LobbyActivity extends Activity {
 			startActivity(newIntent);
     	}
     	
-    	// LOBBY-[]-[]
-    	if (!str.equalsIgnoreCase(KEY_EMPTY_MATCH)) {
+    	// LOBBY-[]-[] >> "[]"
+    	if (!str.contains(KEY_EMPTY_MATCH)) {
     		String[] list = str.replaceAll("[\\:\\[\\]]+", "").split("[\\-]+");
 		    
 		    if (list[0].equalsIgnoreCase(KEY_LOBBY)) {
@@ -259,7 +264,7 @@ public class LobbyActivity extends Activity {
 			    createRadioButtons(teamBRg, listB);
 		    }
     	} else {
-    		Toast.makeText(CONTEXT, "No other players detected.", Toast.LENGTH_SHORT).show();
+    		Toast.makeText(CONTEXT, "Waiting for other players.", Toast.LENGTH_SHORT).show();
     	}
     }
 	    
@@ -269,8 +274,8 @@ public class LobbyActivity extends Activity {
         
     	r.removeAllViews();
     	
-        for(int i=1; i<number; i++){
-            rb[i]  = new RadioButton(this);
+        for(int i=0; i<number; i++){
+            rb[i] = new RadioButton(this);
             rb[i].setText(l[i]);
             rb[i].setClickable(false);
             rb[i].setTextSize(15.0f);

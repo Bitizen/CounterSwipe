@@ -34,21 +34,23 @@ public class SocketService extends Service {
 	private Handler handler;
 	
     private InetAddress serverAddr;
+    private String serverIp;
 	private final IBinder myBinder = new LocalBinder();
 	//private TCPClient mTcpClient = new TCPClient();
 	private static final int SERVERPORT = 5559;
-	private static final String SERVERIP = "192.168.0.16";   
+	//private static final String SERVERIP = "192.168.0.16";
+	//private static final String SERVERIP = "192.168.0.16";
 	private final int IDENTIFIER = 1;
 
 	@Override
 	public IBinder onBind(Intent intent) {
-		System.out.println("I am in Ibinder onBind method");
+		//System.out.println("I am in Ibinder onBind method");
 	    return myBinder;
 	}
 
 	public class LocalBinder extends Binder {
 		public SocketService getService() {
-			System.out.println("I am in Localbinder ");
+			//System.out.println("I am in Localbinder ");
 			return SocketService.this;
 		}
 	}
@@ -59,12 +61,13 @@ public class SocketService extends Service {
 		res = new String(); 
 		result = new String();  
 		message = new String();  
-        System.out.println("I am in on create");  
+		serverIp = new String();
+        //System.out.println("I am in on create");  
     }
 
     public void IsBoundable() {
         //Toast.makeText(this,"I bind like butter", Toast.LENGTH_LONG).show();
-    	System.out.println("BOUNDABLE");
+    	//System.out.println("BOUNDABLE");
     }
 
     public void sendMessage(String message) {
@@ -86,7 +89,7 @@ public class SocketService extends Service {
     @Override
     public int onStartCommand(Intent intent,int flags, int startId){
         super.onStartCommand(intent, flags, startId);
-        System.out.println("I am in on start");
+        //System.out.println("I am in on start");
         //  Toast.makeText(this,"Service created ...", Toast.LENGTH_LONG).show();
         //TRIAL
     	
@@ -121,7 +124,7 @@ public class SocketService extends Service {
 
 	private void setupNetworking() {
 		try {
-			socket = new Socket(SERVERIP, SERVERPORT);
+			socket = new Socket(ServerConnectionActivity.getIp(), SERVERPORT);
 			isr = new InputStreamReader(socket.getInputStream());
 			reader = new BufferedReader(isr);
 			out = new PrintWriter(socket.getOutputStream());
@@ -132,6 +135,10 @@ public class SocketService extends Service {
 		}
 	}
     
+	public void setServerIp(String ip) {
+		this.serverIp = ip;
+	}
+	
     class readSocket implements Runnable {
         @Override
         public void run() {
@@ -141,7 +148,7 @@ public class SocketService extends Service {
 			}
 			
         	try {
-				while((result=reader.readLine())!=null) {
+				while((result=reader.readLine())!=null) { 
 					System.out.println("[S] " + result);
 					
 					if (handler != null) {

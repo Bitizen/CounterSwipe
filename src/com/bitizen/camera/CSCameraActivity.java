@@ -34,8 +34,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.bitizen.R;
 import com.bitizen.camera.util.ColorDetector;
-import com.bitizen.counterswipe.R;
 
 public class CSCameraActivity extends Activity implements CvCameraViewListener2, OnClickListener{ //OnTouchListener
     private static final String TAG = "OCVSample::Activity";
@@ -217,7 +217,6 @@ public class CSCameraActivity extends Activity implements CvCameraViewListener2,
 
 	
 	public void onClick(View v) {
-		// TODO Auto-generated method stub
 	    if(v.getId() == R.id.btnHit){
 	      	    	
 	      //locates the center of the camera input frame

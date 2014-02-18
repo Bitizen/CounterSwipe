@@ -6,6 +6,8 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 
+import com.bitizen.R;
+
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -105,7 +107,7 @@ public class AvailableMatchesActivity extends Activity implements View.OnClickLi
 			@Override
 			public void run() {
 				try {
-					this.sleep(2000);
+					this.sleep(300);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				} finally {

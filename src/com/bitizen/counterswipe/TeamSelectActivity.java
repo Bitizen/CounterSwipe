@@ -1,5 +1,7 @@
 package com.bitizen.counterswipe;
 
+import com.bitizen.R;
+
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -21,6 +23,7 @@ public class TeamSelectActivity extends Activity implements View.OnClickListener
 	private Button teamABtn, teamBBtn;
 
 	private String team;
+	private Boolean readyToClick;
 	
 	private final Context CONTEXT = this;
 	private final String KEY_USERNAME = "username";
@@ -75,6 +78,7 @@ public class TeamSelectActivity extends Activity implements View.OnClickListener
 		message = new String();
 		username = new String();
 		match = new String();
+		readyToClick = false;
 		
 		usernameTv = (TextView) findViewById(R.id.tvUsernameTS);
 		matchTv = (TextView) findViewById(R.id.tvMatchTS);
@@ -107,11 +111,12 @@ public class TeamSelectActivity extends Activity implements View.OnClickListener
 			@Override
 			public void run() {
 				try {
-					this.sleep(2000);
+					this.sleep(300);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				} finally {
 					mBoundService.sendMessage("NEXT");
+					readyToClick = true;
 				}
 				super.run();
 			}
@@ -132,7 +137,7 @@ public class TeamSelectActivity extends Activity implements View.OnClickListener
 		}
 
 		message = team; 
-		if (mBoundService != null) {
+		if (readyToClick && mBoundService != null) {
 		    mBoundService.sendMessage(message);
 		}
 	}

@@ -12,8 +12,8 @@
     </declare-styleable>
     
 	<declare-styleable name = "CameraBridgeViewBase" >
-       <attr name="show_fps" format="boolean"/>
-       <attr name="camera_id" format="integer" >
+       <attr name="show_fps2" format="boolean"/>
+       <attr name="camera_id2" format="integer" >
           <enum name="any" value="-1" />
           <enum name="back" value="0" />
           <enum name="front" value="1" />

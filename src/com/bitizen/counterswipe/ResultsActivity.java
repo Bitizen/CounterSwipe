@@ -2,6 +2,8 @@ package com.bitizen.counterswipe;
 
 import java.util.Random;
 
+import com.bitizen.R;
+
 import android.R.layout;
 import android.os.Bundle;
 import android.app.Activity;
