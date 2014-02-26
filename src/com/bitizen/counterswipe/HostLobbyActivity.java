@@ -7,10 +7,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import com.bitizen.R;
-import com.bitizen.camera.CSCameraActivity;
-import com.bitizen.camera.CustomActivity;
-import com.bitizen.camera.util.BitmapHelper;
-import com.bitizen.camera.util.Log;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -135,16 +131,19 @@ public class HostLobbyActivity extends Activity {
 	}
 
 	private void toggleReady(RadioButton rb) {
-		if (rb.isChecked()) {
-        	mBoundService.sendMessage(KEY_IAMIDLE);
-			rb.setChecked(false);	
-			isReady = false;
-		} else if (!rb.isChecked() ){
-        	mBoundService.sendMessage(KEY_IAMREADY);
-			rb.setChecked(true);
-			isReady = true;
+		try {
+			if (isReady) {
+				if (rb != null ) rb.setChecked(false);	
+	        	mBoundService.sendMessage(KEY_IAMIDLE);
+	        	isReady = false;
+			} else if (!isReady){
+				if (rb != null ) rb.setChecked(true);
+	        	mBoundService.sendMessage(KEY_IAMREADY);
+	        	isReady = true;
+			}
+		} catch (NullPointerException e) {
+			e.printStackTrace();
 		}
-		
 	}
 	
 	@Override
@@ -197,12 +196,11 @@ public class HostLobbyActivity extends Activity {
 	    		
 				if (rbID > 0) {
 					RadioButton rb = (RadioButton) rgMarkers.findViewById(rbID);
-					myMarker = rb.getText().toString();
+					myMarker = rb.getTag().toString();
 					
 		        	mBoundService.sendMessage(KEY_CHANGEMYMARKER + "-" + myMarker);
-		        	Toast.makeText(CONTEXT, myMarker + " is now your marker.", Toast.LENGTH_SHORT).show();
+		        	Toast.makeText(CONTEXT, "Marker " + myMarker + " is now your marker.", Toast.LENGTH_SHORT).show();
 					dialog.dismiss();
-					
 				} else {
 					Toast.makeText(CONTEXT, "Please select a marker.", Toast.LENGTH_SHORT).show();
 				}

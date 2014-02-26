@@ -1,5 +1,7 @@
 package com.bitizen.counterswipe;
 
+import java.net.ConnectException;
+
 import com.bitizen.R;
 
 import android.app.Activity;
@@ -81,7 +83,7 @@ public class ServerConnectionActivity extends Activity implements View.OnClickLi
 	public void onClick(View view) {
 		switch (view.getId()) {
 			case R.id.btnConnectServer:
-				message = serverIpEt.getText().toString(); 
+				message = serverIpEt.getText().toString().trim(); 
 				serverIp = message;
 				
 				setUpService();

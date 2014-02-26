@@ -1,93 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:id="@+id/dlChangeMyMarker" >
     
     <RadioGroup
+        android:id="@+id/rgMarkers"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/rgMarkers" >
+        android:layout_centerHorizontal="true" >
    	
-        <LinearLayout
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:orientation="horizontal" >
 		<RadioButton
 	        android:id="@+id/rbM1"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content" />
-        <ImageView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:src="@drawable/m1" />
-    	</LinearLayout>
-        <LinearLayout
+	        android:tag="1"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
-	        android:orientation="horizontal" >
+	        android:drawableRight="@drawable/marker1"  />
+        
 		<RadioButton
 	        android:id="@+id/rbM2"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content" />
-        <ImageView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:src="@drawable/m2" />
-    	</LinearLayout>
-        <LinearLayout
+	        android:tag="2"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
-	        android:orientation="horizontal" >
+	        android:drawableRight="@drawable/marker2" />
+
 		<RadioButton
 	        android:id="@+id/rbM3"
+	        android:tag="3"
 	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content" />
-        <ImageView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:src="@drawable/m3" />
-    	</LinearLayout>
-        <LinearLayout
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:orientation="horizontal" >
+	        android:layout_height="wrap_content" 
+	        android:drawableRight="@drawable/marker3" />
+
 		<RadioButton
 	        android:id="@+id/rbM4"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content" />
-        <ImageView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:src="@drawable/m4" />
-    	</LinearLayout>
-        <LinearLayout
+	        android:tag="4"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
-	        android:orientation="horizontal" >
+	        android:drawableRight="@drawable/marker4" />
+
 		<RadioButton
 	        android:id="@+id/rbM5"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content" />
-        <ImageView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:src="@drawable/m5" />
-    	</LinearLayout>
-        <LinearLayout
+	        android:tag="5"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
-	        android:orientation="horizontal" >
+	        android:drawableRight="@drawable/marker5" />
+
 		<RadioButton
 	        android:id="@+id/rbM6"
+	        android:tag="6"
 	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content" />
-        <ImageView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:src="@drawable/m6" />
-    	</LinearLayout>
+	        android:layout_height="wrap_content" 
+	        android:drawableRight="@drawable/marker6" />
+		
     </RadioGroup>
     
     <Button
@@ -95,6 +60,7 @@
         android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
+        android:layout_below="@id/rgMarkers"
         android:text="SET" />
     
-</LinearLayout>
+</RelativeLayout>

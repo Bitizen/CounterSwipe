@@ -25,8 +25,11 @@ public class ResultsActivity extends Activity implements View.OnClickListener{
 	private Button replayBtn;
 	private Button leaveBtn;
 
+	private String victor;
+	
 	private final Context CONTEXT = this;
 	private final String KEY_USERNAME = "username";
+	private final String KEY_GET_WINNER = "GETWINNER";
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +45,11 @@ public class ResultsActivity extends Activity implements View.OnClickListener{
 		resultsTv = (TextView) findViewById(R.id.tvResults);
 		replayBtn = (Button) findViewById(R.id.btnReplay);
 		leaveBtn = (Button) findViewById(R.id.btnLeave);
+		
+		// TODO get winning team
+		victor = "A";
+		
+		resultsTv.setText("TEAM " + victor + " WINS!");
 	}
 
 	@Override

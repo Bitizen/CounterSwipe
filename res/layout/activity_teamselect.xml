@@ -18,12 +18,14 @@
         android:id="@+id/tvUsernameTS"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+  		android:layout_gravity="center"
         android:text="username" />
 
     <TextView
         android:id="@+id/tvMatchTS"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+  		android:layout_gravity="center"
         android:text="match" />
 
     <Button
@@ -31,7 +33,6 @@
         android:layout_width="108dp"
         android:layout_height="wrap_content"
         android:text="A"
-        android:textColor="#3366FF"
         android:textStyle="bold"
         android:textSize="40sp"
   		android:padding="30dp"
@@ -43,7 +44,6 @@
         android:layout_width="108dp"
         android:layout_height="wrap_content"
         android:text="B"
-        android:textColor="#FFFF00"
         android:textStyle="bold"
         android:textSize="40sp"
         android:padding="30dp" 

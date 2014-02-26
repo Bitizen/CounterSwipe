@@ -75,7 +75,13 @@
             android:theme="@android:style/Theme.NoTitleBar" />
      	
      	<activity
-            android:name=".camera.CustomActivity"
+            android:name=".counterswipe.CustomActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />
+     	
+     	<activity
+            android:name=".counterswipe.BlackSplashActivity"
             android:label="@string/app_name"
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />

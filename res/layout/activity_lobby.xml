@@ -26,6 +26,7 @@
     <RadioGroup
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:id="@+id/rgTeamA" >
    	
     </RadioGroup>
@@ -42,6 +43,7 @@
     <RadioGroup
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:id="@+id/rgTeamB" >
    	
     </RadioGroup>

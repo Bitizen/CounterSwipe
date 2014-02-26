@@ -10,8 +10,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 import com.bitizen.R;
-import com.bitizen.camera.CSCameraActivity;
-import com.bitizen.camera.CustomActivity;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -44,6 +42,7 @@ public class LobbyActivity extends Activity {
 	private RadioGroup teamARg, teamBRg, rgMarkers;
 	private Button setMarkerB;
 
+	private Boolean isReady = false;
 	private String result;
 	private String message;
 	private String myMarker;
@@ -126,7 +125,7 @@ public class LobbyActivity extends Activity {
 		    }
 		};
 		
-		// Wait for server reply
+		/*// Wait for server reply
 		Thread buffer = new Thread() {
 			@Override
 			public void run() {
@@ -141,7 +140,7 @@ public class LobbyActivity extends Activity {
 				super.run();
 			}
 		};
-		buffer.start();
+		buffer.start();*/
 	}
 	
 	/*
@@ -161,15 +160,17 @@ public class LobbyActivity extends Activity {
 	
 	private void toggleReady(RadioButton rb) {
 		try {
-			if (rb.isChecked()) {
-				rb.setChecked(false);	
+			if (isReady) {
+				if (rb != null ) rb.setChecked(false);	
 	        	mBoundService.sendMessage(KEY_IAMIDLE);
-			} else if (!rb.isChecked() ){
-				rb.setChecked(true);
+	        	isReady = false;
+			} else if (!isReady){
+				if (rb != null ) rb.setChecked(true);
 	        	mBoundService.sendMessage(KEY_IAMREADY);
+	        	isReady = true;
 			}
 		} catch (NullPointerException e) {
-			
+			e.printStackTrace();
 		}
 	}
 	
@@ -177,7 +178,7 @@ public class LobbyActivity extends Activity {
 		//if (playerA1.isChecked() && playerB1.isChecked()) {
 		//	Intent intent = new Intent(this, CameraActivity.class);
 	    //	startActivityForResult(intent, REQ_CAMERA_IMAGE);
-		mBoundService.sendMessage("NEXT");
+		//mBoundService.sendMessage("NEXT");
 	}
 
 	@Override
@@ -193,7 +194,7 @@ public class LobbyActivity extends Activity {
 	        case R.id.mi_ready:
 	            //Toast.makeText(LobbyActivity.this, "Ready is Selected", Toast.LENGTH_SHORT).show();
 	        	toggleReady(myRb);
-	        	checkForFlag();
+	        	//checkForFlag();
 	            return true;
 	        case R.id.mi_setSelfMarker:
 	        	popupMarkerDialog();
@@ -225,12 +226,11 @@ public class LobbyActivity extends Activity {
 	    		
 				if (rbID > 0) {
 					RadioButton rb = (RadioButton) rgMarkers.findViewById(rbID);
-					myMarker = rb.getText().toString();
+					myMarker = rb.getTag().toString();
 					
 		        	mBoundService.sendMessage(KEY_CHANGEMYMARKER + "-" + myMarker);
-		        	Toast.makeText(CONTEXT, myMarker + " is now your marker.", Toast.LENGTH_SHORT).show();
+		        	Toast.makeText(CONTEXT, "Marker " + myMarker + " is now your marker.", Toast.LENGTH_SHORT).show();
 					dialog.dismiss();
-					
 				} else {
 					Toast.makeText(CONTEXT, "Please select a marker.", Toast.LENGTH_SHORT).show();
 				}

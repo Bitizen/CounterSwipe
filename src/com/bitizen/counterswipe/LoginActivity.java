@@ -93,7 +93,7 @@ public class LoginActivity extends Activity implements View.OnClickListener{
 		Intent newIntent;
 		switch (view.getId()) {
 			case R.id.btnJoin:
-				message = usernameEt.getText().toString(); 
+				message = usernameEt.getText().toString().trim(); 
 				
 				if (mBoundService != null) {
 				    mBoundService.sendMessage(KEY_IAMREG + message);
