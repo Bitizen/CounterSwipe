@@ -23,7 +23,6 @@ public class TeamSelectActivity extends Activity implements View.OnClickListener
 	private Button teamABtn, teamBBtn;
 
 	private String team;
-	private Boolean readyToClick;
 	
 	private final Context CONTEXT = this;
 	private final String KEY_USERNAME = "username";
@@ -78,7 +77,7 @@ public class TeamSelectActivity extends Activity implements View.OnClickListener
 		message = new String();
 		username = new String();
 		match = new String();
-		readyToClick = false;
+		team = new String();
 		
 		usernameTv = (TextView) findViewById(R.id.tvUsernameTS);
 		matchTv = (TextView) findViewById(R.id.tvMatchTS);
@@ -106,22 +105,6 @@ public class TeamSelectActivity extends Activity implements View.OnClickListener
 		    }
 		};
 
-		// Wait for server reply
-		Thread buffer = new Thread() {
-			@Override
-			public void run() {
-				try {
-					this.sleep(300);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				} finally {
-					mBoundService.sendMessage("NEXT");
-					readyToClick = true;
-				}
-				super.run();
-			}
-		};
-		buffer.start();
 	}
 
 	@Override
@@ -134,10 +117,13 @@ public class TeamSelectActivity extends Activity implements View.OnClickListener
 			case R.id.btnTeamB:
 				team = "B";
 				break;
+				
+			default:
+				break;
 		}
 
 		message = team; 
-		if (readyToClick && mBoundService != null) {
+		if (mBoundService != null) {
 		    mBoundService.sendMessage(message);
 		}
 	}

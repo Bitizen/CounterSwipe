@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:id="@+id/dlHOptions" >
+
+    <Button
+        android:id="@+id/bHBeginOp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:text="Begin" />
+
+    <Button
+        android:id="@+id/bHMarkerOp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/bHBeginOp"
+        android:layout_alignBottom="@+id/bHBeginOp"
+        android:layout_toRightOf="@+id/bHBeginOp"
+        android:text="Set Marker" />
+
+    <Button
+        android:id="@+id/bHQuitOp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/bHMarkerOp"
+        android:layout_alignBottom="@+id/bHMarkerOp"
+        android:layout_toRightOf="@+id/bHMarkerOp"
+        android:text="Quit" />
+
+</RelativeLayout>

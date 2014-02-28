@@ -10,7 +10,8 @@ import android.os.Bundle;
 
 public class BlackSplashActivity extends Activity {
 
-	private MediaPlayer splashSound;
+	private SoundPoolPlayer sound;
+	
 	private final Context CONTEXT = this;
 	
     @Override
@@ -18,7 +19,7 @@ public class BlackSplashActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
         
-        splashSound = MediaPlayer.create(CONTEXT, R.raw.gameover);
+        sound = new SoundPoolPlayer(this);
 
         Thread timer = new Thread() {
 			@Override
@@ -44,7 +45,7 @@ public class BlackSplashActivity extends Activity {
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				} finally {
-			        splashSound.start();
+			        sound.playShortResource(R.raw.gameover);
 				}
 			}
         };
@@ -58,7 +59,7 @@ public class BlackSplashActivity extends Activity {
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				} finally {
-			        splashSound.start();
+			        sound.playShortResource(R.raw.gameover);
 			        t3.start();
 				}
 			}
@@ -73,7 +74,7 @@ public class BlackSplashActivity extends Activity {
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				} finally {
-			        splashSound.start();
+			        sound.playShortResource(R.raw.gameover);
 			        t2.start();
 				}
 			}
@@ -86,7 +87,7 @@ public class BlackSplashActivity extends Activity {
 	@Override
 	protected void onPause() {
 		super.onPause();
-		splashSound.release();
+		sound.release();
 		finish();
 	}
     

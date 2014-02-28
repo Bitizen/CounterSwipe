@@ -30,12 +30,14 @@ public class LoginActivity extends Activity implements View.OnClickListener{
 	private Boolean mIsBound;
 	private ServiceConnection mConnection;
 
-	private final Context CONTEXT = this; 
-	private final String KEY_USERNAME = "username";
-	private final String KEY_MATCH = "match";
-	private final String KEY_TEAM = "team";
-	private final String KEY_IAMHOST = "HOST-";
-	private final String KEY_IAMREG = "REG-";
+	private final Context CONTEXT 					= this; 
+	private final String KEY_USERNAME 				= "username";
+	private final String KEY_MATCH 					= "match";
+	private final String KEY_TEAM 					= "team";
+	private final String KEY_IAMHOST 				= "HOST-";
+	private final String KEY_IAMREG 				= "REG-";
+	private final int MINIMUM_USERNAME 				= 7;
+	private final int MAXIMUM_USERNAME 				= 14;
 	
 	private static final String KEY_ERR_CONNECT		= "server conn error";
 	private static final String KEY_GET_USERNAME	= "username: ";
@@ -90,23 +92,24 @@ public class LoginActivity extends Activity implements View.OnClickListener{
 
 	@Override
 	public void onClick(View view) {
-		Intent newIntent;
-		switch (view.getId()) {
-			case R.id.btnJoin:
-				message = usernameEt.getText().toString().trim(); 
-				
-				if (mBoundService != null) {
-				    mBoundService.sendMessage(KEY_IAMREG + message);
-				}
-				break;
-				
-			case R.id.btnHost:
-				message = usernameEt.getText().toString(); 
-				
-				if (mBoundService != null) {
-				    mBoundService.sendMessage(KEY_IAMHOST + message);
-				}
-				break;
+		message = usernameEt.getText().toString().trim(); 
+		
+		if(message.length() < MINIMUM_USERNAME) {
+			Toast.makeText(CONTEXT, "Your username should have\nat least 7 characters.", Toast.LENGTH_SHORT).show();
+		} else if(message.length() > MAXIMUM_USERNAME) {
+			Toast.makeText(CONTEXT, "Your username shouldn't have\nmore than 14 characters.", Toast.LENGTH_SHORT).show();
+		} else {
+			switch (view.getId()) {
+				case R.id.btnJoin:
+					if (mBoundService != null)
+					    mBoundService.sendMessage(KEY_IAMREG + message);
+					break;
+					
+				case R.id.btnHost:
+					if (mBoundService != null)
+					    mBoundService.sendMessage(KEY_IAMHOST + message);
+					break;
+			}
 		}
 	}
 

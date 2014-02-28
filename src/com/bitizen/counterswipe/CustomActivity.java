@@ -44,25 +44,26 @@ import com.bitizen.R;
  * @author Tobi
  *
  */
-public class CustomActivity extends AndARActivity implements View.OnClickListener, OnGestureListener {
+public class CustomActivity extends AndARActivity implements OnGestureListener {
 	
-	private final int MENU_SCREENSHOT = 0;
 	private ARToolkit artoolkit;
-	private Context CONTEXT = this;
 	private String username, match, team;
 	private CustomObject marker1, marker2, marker3, marker4, marker5, marker6;
-	private Button mHitBtn;
-	private int ammo = 7;
 	private GestureDetector detector;
+	private int ammo 								= 7;
+	private Boolean interrupted 					= false;
+	private SoundPoolPlayer sound;
 	
     private Handler serviceHandler;
 	private SocketService mBoundService;
 	private Boolean mIsBound;
 	private ServiceConnection mConnection;
-
-	private final String KEY_USERNAME = "username";
-	private final String KEY_MATCH = "match";
-	private final String KEY_TEAM = "team";
+	
+	private final Context CONTEXT 					= this;
+	private final String KEY_USERNAME 				= "username";
+	private final String KEY_MATCH 					= "match";
+	private final String KEY_TEAM 					= "team";
+	private final int MENU_SCREENSHOT 				= 0;
 
 	private static final String KEY_HIT				= "HIT-";
 	private static final String KEY_GET_HIT			= "GETHIT";
@@ -83,8 +84,8 @@ public class CustomActivity extends AndARActivity implements View.OnClickListene
 		startService(new Intent(CONTEXT, SocketService.class));
         doBindService();
 		
-		CustomRenderer renderer = new CustomRenderer();//optional, may be set to null
-		super.setNonARRenderer(renderer);//or might be omited
+		CustomRenderer renderer = new CustomRenderer();
+		super.setNonARRenderer(renderer);
 		try {
 			ARToolkit artoolkit = getArtoolkit();
 			float[] red = new float[] {0.9f, 0.0f, 0.0f};
@@ -138,16 +139,30 @@ public class CustomActivity extends AndARActivity implements View.OnClickListene
 			artoolkit.registerARObject(marker6);
 			
 		} catch (AndARException ex){
-			//handle the exception, that means: show the user what happened
+
 		}		
 		
-		mHitBtn = hitBtn;
-		mHitBtn.setOnClickListener(this);
+		final Thread buffer = new Thread() {
+			@Override
+			public void run() {
+				while (!interrupted) {
+					try {
+						sleep(1000);
+					} catch (InterruptedException e) {
+						
+					} finally {
+						mBoundService.sendMessage("");
+					}
+				}
+			}
+		};
+		buffer.start();
 	}
 	
 	public void initializeElements() {
 
         detector = new GestureDetector(this);
+        sound = new SoundPoolPlayer(this);
 		
 		mBoundService = new SocketService();
 		mConnection = new ServiceConnection() {
@@ -250,47 +265,6 @@ public class CustomActivity extends AndARActivity implements View.OnClickListene
 		
 	}
 
-	@Override
-	public void onClick(View v) {
-		
-		if (v.getId() == mHitBtn.getId()
-				&& ammo > 0) {
-			
-			MediaPlayer mp = MediaPlayer.create(CONTEXT, R.raw.hit);
-			mp.start();
-			--ammo;
-			
-			if (marker1.isVisible() && isWithinCrosshairs(marker1)) {
-				Toast.makeText(this, marker1.getPoint().toString() + " - RED [M1] HIT", Toast.LENGTH_SHORT).show();
-				mBoundService.sendMessage(KEY_HIT + username + "-1");
-			} else if (marker2.isVisible() && isWithinCrosshairs(marker2)) {
-				Toast.makeText(this, marker2.getPoint().toString() + " - BLUE [M2] HIT", Toast.LENGTH_SHORT).show();
-				mBoundService.sendMessage(KEY_HIT + username + "-2");
-			} else if (marker3.isVisible() && isWithinCrosshairs(marker3)) {
-				Toast.makeText(this, marker3.getPoint().toString() + " - YELLOW [M3] HIT", Toast.LENGTH_SHORT).show();
-				mBoundService.sendMessage(KEY_HIT + username + "-3");
-			} else if (marker4.isVisible() && isWithinCrosshairs(marker4)) {
-				Toast.makeText(this, marker4.getPoint().toString() + " - GREEN [M4] HIT", Toast.LENGTH_SHORT).show();
-				mBoundService.sendMessage(KEY_HIT + username + "-4");
-			} else if(marker5.isVisible() && isWithinCrosshairs(marker5)) {
-				Toast.makeText(this, marker5.getPoint().toString() + " - ORANGE [M5] HIT", Toast.LENGTH_SHORT).show();
-				mBoundService.sendMessage(KEY_HIT + username + "-5");
-			} else if(marker6.isVisible() && isWithinCrosshairs(marker6)) {
-				Toast.makeText(this, marker6.getPoint().toString() + " - PURPLE [M6] HIT", Toast.LENGTH_SHORT).show();
-				mBoundService.sendMessage(KEY_HIT + username + "-6");
-			} else {
-				Toast.makeText(this, "MISS", Toast.LENGTH_SHORT).show();
-				//String text = Float.toString(marker1.getPoint().x);
-				//String text2 = Float.toString(marker1.getPoint().y);
-				//String text3 = text + " : " + text2;
-				//Toast.makeText(this, text3, Toast.LENGTH_SHORT).show();
-			}
-		} else {
-			Toast.makeText(this, "RELOAD!", Toast.LENGTH_SHORT).show();
-		}
-		
-	}
-
 	private static final int maxX = 1130;//445; //1130 //430
 	private static final int maxY = 730;//300; //730 //280
 	private static final int minX = 830;//322; //830 //361
@@ -311,6 +285,7 @@ public class CustomActivity extends AndARActivity implements View.OnClickListene
 	    if (str.equalsIgnoreCase(KEY_GET_HIT)) {
 			getHit();
 		} else if (str.equalsIgnoreCase(KEY_GAMEOVER)) {
+		    interrupted = true;
     		Intent newIntent = new Intent(CONTEXT, BlackSplashActivity.class);
     		Bundle extras = new Bundle();
 			extras.putString(KEY_USERNAME, username);
@@ -323,20 +298,19 @@ public class CustomActivity extends AndARActivity implements View.OnClickListene
 	
 	private int healthBars = 3;
 	private void getHit() {
-		Toast.makeText(CONTEXT, "GOT HIT", Toast.LENGTH_SHORT).show();
+		sound.playShortResource(R.raw.gethit);
+		
 		if (healthBars > 0) {
 			--healthBars;
 		}
 		
 		switch(healthBars) {
 			case 2:
-				Toast.makeText(CONTEXT, "life-2", Toast.LENGTH_SHORT).show();
 				health[2].setVisibility(View.INVISIBLE);
 				break;
 			case 1:
-				Toast.makeText(CONTEXT, "life-1", Toast.LENGTH_SHORT).show();
 				health[1].setVisibility(View.INVISIBLE);
-				//health[2].setVisibility(View.INVISIBLE);
+				health[2].setVisibility(View.INVISIBLE);
 				break;
 			default:
 				break;
@@ -344,6 +318,11 @@ public class CustomActivity extends AndARActivity implements View.OnClickListene
 		
 	}
 
+	@Override
+	public void onClick(View arg0) {
+		
+	}
+	
 	@Override
     public boolean onDown(MotionEvent e) {
         //Toast.makeText(getApplicationContext(), "OnDown Gesture", Toast.LENGTH_SHORT).show();
@@ -357,12 +336,13 @@ public class CustomActivity extends AndARActivity implements View.OnClickListene
 
 	@Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-        //Toast.makeText(getApplicationContext(), "Fling Gesture", 100).show();
         if (ammo == 0) {
         	ammo = 7;
+        	sound.playShortResource(R.raw.reload);
         	Toast.makeText(CONTEXT, "AMMO : " + ammo, Toast.LENGTH_SHORT).show();
         } else if (ammo > 0) {
-        	Toast.makeText(CONTEXT, "STILL ARMED!", Toast.LENGTH_SHORT).show();
+        	sound.playShortResource(R.raw.stillarmed);
+        	Toast.makeText(CONTEXT, "STILL ARMED", Toast.LENGTH_SHORT).show();
         }
         return true;
     }
@@ -385,6 +365,42 @@ public class CustomActivity extends AndARActivity implements View.OnClickListene
 
 	@Override
 	public boolean onSingleTapUp(MotionEvent e) {
+		if (ammo > 0) {
+			
+			--ammo;
+			
+			if (marker1.isVisible() && isWithinCrosshairs(marker1)) {
+				//Toast.makeText(this, marker1.getPoint().toString() + " - RED [M1] HIT", Toast.LENGTH_SHORT).show();
+				mBoundService.sendMessage(KEY_HIT + username + "-1");
+				sound.playShortResource(R.raw.hit);
+			} else if (marker2.isVisible() && isWithinCrosshairs(marker2)) {
+				//Toast.makeText(this, marker2.getPoint().toString() + " - BLUE [M2] HIT", Toast.LENGTH_SHORT).show();
+				mBoundService.sendMessage(KEY_HIT + username + "-2");
+				sound.playShortResource(R.raw.hit);
+			} else if (marker3.isVisible() && isWithinCrosshairs(marker3)) {
+				//Toast.makeText(this, marker3.getPoint().toString() + " - YELLOW [M3] HIT", Toast.LENGTH_SHORT).show();
+				mBoundService.sendMessage(KEY_HIT + username + "-3");
+				sound.playShortResource(R.raw.hit);
+			} else if (marker4.isVisible() && isWithinCrosshairs(marker4)) {
+				//Toast.makeText(this, marker4.getPoint().toString() + " - GREEN [M4] HIT", Toast.LENGTH_SHORT).show();
+				mBoundService.sendMessage(KEY_HIT + username + "-4");
+				sound.playShortResource(R.raw.hit);
+			} else if(marker5.isVisible() && isWithinCrosshairs(marker5)) {
+				//Toast.makeText(this, marker5.getPoint().toString() + " - ORANGE [M5] HIT", Toast.LENGTH_SHORT).show();
+				mBoundService.sendMessage(KEY_HIT + username + "-5");
+				sound.playShortResource(R.raw.hit);
+			} else if(marker6.isVisible() && isWithinCrosshairs(marker6)) {
+				//Toast.makeText(this, marker6.getPoint().toString() + " - PURPLE [M6] HIT", Toast.LENGTH_SHORT).show();
+				mBoundService.sendMessage(KEY_HIT + username + "-6");
+				sound.playShortResource(R.raw.hit);
+			} else {
+				sound.playShortResource(R.raw.miss);
+			}
+		} else {
+			sound.playShortResource(R.raw.noammo);
+			Toast.makeText(this, "RELOAD!", Toast.LENGTH_SHORT).show();
+		}
+		
 		//Toast.makeText(getApplicationContext(), "Single Tap Gesture", Toast.LENGTH_SHORT).show();
         return true;
 	}
@@ -410,6 +426,8 @@ public class CustomActivity extends AndARActivity implements View.OnClickListene
 	protected void onDestroy() {
 	    super.onDestroy();
 	    doUnbindService();
+	    interrupted = true;
+	    sound.release();
 	}
 	
 } // end of class

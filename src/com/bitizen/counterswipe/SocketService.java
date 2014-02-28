@@ -133,6 +133,8 @@ public class SocketService extends Service {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (NullPointerException e) {
+			e.printStackTrace();
 		}
 	}
     

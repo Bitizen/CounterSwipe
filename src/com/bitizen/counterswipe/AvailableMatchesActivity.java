@@ -18,6 +18,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -29,24 +30,28 @@ public class AvailableMatchesActivity extends Activity implements View.OnClickLi
 
 	private LinearLayout matchesLl;
 	private TextView usernameTv;
-	private Button nextBtn;
+	//private Button nextBtn;
 	private RadioGroup matchesRg;
 
 	private String result;
 	private String message;
 	private String username;
 	private String match;
+	private Boolean interrupted = false;
 	
     private Handler serviceHandler;
 	private SocketService mBoundService;
 	private Boolean mIsBound;
 	private ServiceConnection mConnection;
-
-	private final Context CONTEXT = this; 
-	private final String KEY_USERNAME = "username";
-	private final String KEY_MATCH = "match";
-	private final String KEY_LIST_MATCHES = "Matches";
+	private Thread buffer;
 	
+	private final Context CONTEXT 					= this; 
+	private final String KEY_USERNAME 				= "username";
+	private final String KEY_MATCH 					= "match";
+	private final String KEY_LIST_MATCHES 			= "Matches";
+	private final String KEY_PICKMATCH				= "PICKMATCH-";
+	
+	private static final String KEY_SHOWMATCHES		= "SHOWMATCHES";
 	private static final String KEY_MATCH_AVAIL 	= "available";
 	private static final String KEY_MATCH_FULL 		= "full";
 	
@@ -64,7 +69,7 @@ public class AvailableMatchesActivity extends Activity implements View.OnClickLi
 	        username = str;
 	    }
 		
-	    nextBtn.setOnClickListener(this);
+	    //nextBtn.setOnClickListener(this);
 		
 		startService(new Intent(CONTEXT, SocketService.class));
         doBindService();
@@ -78,7 +83,7 @@ public class AvailableMatchesActivity extends Activity implements View.OnClickLi
 		
 		matchesLl = (LinearLayout) findViewById(R.id.llAvailableMatches);
 		usernameTv = (TextView) findViewById(R.id.tvUsernameInAM);
-	    nextBtn = (Button) findViewById(R.id.btnNext);
+	    //nextBtn = (Button) findViewById(R.id.btnNext);
 	    matchesRg = (RadioGroup) findViewById(R.id.rgAvailableMatches);
 
 		mBoundService = new SocketService();
@@ -102,49 +107,50 @@ public class AvailableMatchesActivity extends Activity implements View.OnClickLi
 		    }
 		};
 
-		// Wait for server reply
-		Thread buffer = new Thread() {
+		buffer = new Thread() {
 			@Override
 			public void run() {
-				try {
-					this.sleep(300);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				} finally {
-					mBoundService.sendMessage("NEXT");
+				while(!interrupted) {
+					try {
+						sleep(500);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+						interrupted = true;
+					} finally {
+						mBoundService.sendMessage(KEY_SHOWMATCHES);
+					}
 				}
-				super.run();
 			}
 		};
 		buffer.start();
 	}
-    
-	
 	
 	@Override
 	public void onClick(View view) {
+		/*
 		switch (view.getId()) {
 			case R.id.btnNext:
 				
 				int radioButtonID = matchesRg.getCheckedRadioButtonId();
-				System.out.println("rbid: " + radioButtonID);
+				//System.out.println("rbid: " + radioButtonID);
 				
 				if (radioButtonID > 0) {
 					RadioButton rb = (RadioButton) matchesRg.findViewById(radioButtonID);
 					
 					String m = rb.getText().toString();
 					match = m;
-					System.out.println(m);
+					//System.out.println(m);
 	
 					message = m; 
 					if (mBoundService != null) {
-					    mBoundService.sendMessage(message);
+					    mBoundService.sendMessage(KEY_PICKMATCH + message);
 					}
 				} else {
 					Toast.makeText(CONTEXT, "Please select a match.", Toast.LENGTH_SHORT).show();
 				}
 				break;
 		}
+		*/
 		
 	}
 	
@@ -155,6 +161,8 @@ public class AvailableMatchesActivity extends Activity implements View.OnClickLi
 	    if (list[0].equalsIgnoreCase(KEY_LIST_MATCHES)) {
 		    createRadioButtons(list);
 	    } else if (list[1].equalsIgnoreCase(KEY_MATCH_AVAIL)) {
+		    buffer.interrupt();
+		    
         	Intent newIntent = new Intent(CONTEXT, TeamSelectActivity.class);
 			Bundle extras = new Bundle();
 			extras.putString(KEY_USERNAME, username);
@@ -176,6 +184,15 @@ public class AvailableMatchesActivity extends Activity implements View.OnClickLi
             rb[i]  = new RadioButton(this);
             matchesRg.addView(rb[i]);
             rb[i].setText(l[i]);
+            final String msg = rb[i].getText().toString();
+            rb[i].setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View arg0) {
+					message = msg;
+					match = message;
+				    mBoundService.sendMessage(KEY_PICKMATCH + match);
+				}
+            });
         }
     }
     
@@ -200,6 +217,7 @@ public class AvailableMatchesActivity extends Activity implements View.OnClickLi
 	protected void onDestroy() {
 	    super.onDestroy();
 	    doUnbindService();
+	    interrupted = true;
 	}
 	
 } //end of class 

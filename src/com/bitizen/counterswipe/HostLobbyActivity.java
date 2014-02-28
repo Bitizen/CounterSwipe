@@ -1,11 +1,5 @@
 package com.bitizen.counterswipe;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.ServerSocket;
-import java.net.Socket;
-
 import com.bitizen.R;
 
 import android.app.Activity;
@@ -18,67 +12,54 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.view.GestureDetector;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.GestureDetector.OnGestureListener;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
-public class HostLobbyActivity extends Activity {
+public class HostLobbyActivity extends Activity implements OnGestureListener {
 
 	private RadioButton myRb;
 	private RadioButton rbM1, rbM2, rbM3, rbM4, rbM5, rbM6;
-	private RadioGroup teamARg, teamBRg, rgMarkers;
-	private Button setMarkerB;
-	private Spinner sTeamA, sTeamB;
-	private RadioButton rbRed, rbBlue, rbGreen, rbYellow, rbOrange;
-	private Button setColorB, setTeamColorB;
+	private RadioGroup teamAHRg, teamBHRg, rgMarkers;
+	private Button setMarkerB, readyOpBtn, markerOpBtn, quitOpBtn;
 
-	private Boolean isReady = false;
-	private String result;
-	private String message;
 	private String username, match, team;
 	private String myMarker;
-	
-	private final Context CONTEXT = this;
-	private final String KEY_USERNAME = "username";
-	private final String KEY_MATCH = "match";
-	private final String KEY_TEAM = "team";
-	private final String KEY_LOBBY = "LOBBY";
-	private final String KEY_HOST_LOBBY = "HOSTLOBBY";
-	private final String KEY_IAMIDLE = "IAMIDLE";
-	private final String KEY_IAMREADY = "IAMREADY";
-	private final String KEY_EMPTY_MATCH = "LOBBY-[]-[]";
-	private static final String KEY_CHANGEMYMARKER 	= "CHANGEMYMARKER";
-	
+	private Boolean isReady 					= false;
+	private Boolean interrupted 				= false;
+
     private Handler serviceHandler;
 	private SocketService mBoundService;
 	private Boolean mIsBound;
 	private ServiceConnection mConnection;
+	private Thread buffer;
+	private GestureDetector detector;
 	
-	private static final String KEY_GET_USERNAME	= "username: ";
-	private static final String KEY_USERNAME_AVAIL 	= "uname available!";
-	private static final String KEY_USERNAME_TAKEN 	= "uname taken";
-	private static final String KEY_MATCH_AVAIL 	= "available";
-	private static final String KEY_MATCH_FULL 		= "full";
-	private static final String KEY_TEAM_AVAIL 		= "team available";
-	private static final String KEY_TEAM_FULL 		= "team full";
-	private static final String KEY_INVALID			= "invalid";
-	private static final String KEY_READY_USER 		= "waiting for user ready...";
-	private static final String KEY_READY_MATCH 	= "waiting for match ready...";
+	private final Context CONTEXT 				= this;
+	private final String KEY_USERNAME 			= "username";
+	private final String KEY_MATCH 				= "match";
+	private final String KEY_TEAM 				= "team";
+	private final String KEY_LOBBY 				= "LOBBY";
+	private final String KEY_IAMIDLE 			= "IAMIDLE";
+	private final String KEY_IAMREADY 			= "IAMREADY";
+	private final String KEY_EMPTY_MATCH		= "[]";
+	private final String KEY_CHANGEMYMARKER 	= "CHANGEMYMARKER";
+	private final String KEY_MARKERTAKEN		= "MARKERTAKEN";
+	private final String KEY_MARKERCHANGED		= "MARKERCHANGED";
+
 	private static final String KEY_START_GAME 		= "start game";
-	
-    private static final int REQ_CAMERA_IMAGE = 123;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -95,18 +76,17 @@ public class HostLobbyActivity extends Activity {
 		
 		startService(new Intent(CONTEXT, SocketService.class));
         doBindService();
-        
 
 	}
 
 	private void initializeElements() {
-		result = new String();
-		message = new String();
+        detector = new GestureDetector(this);
 		username = new String();
 		match = new String();
+		myMarker = new String();
 		
-		teamARg = (RadioGroup) findViewById(R.id.rgHTeamA);
-		teamBRg = (RadioGroup) findViewById(R.id.rgHTeamB);
+		teamAHRg = (RadioGroup) findViewById(R.id.rgHTeamA);
+		teamBHRg = (RadioGroup) findViewById(R.id.rgHTeamB);
 		
 		mBoundService = new SocketService();
 		mConnection = new ServiceConnection() {
@@ -128,6 +108,23 @@ public class HostLobbyActivity extends Activity {
 		    	updateUI(msg);
 		    }
 		};
+
+		buffer = new Thread() {
+			@Override
+			public void run() {
+				while(!interrupted) {
+					try {
+						sleep(1000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+			    	    interrupted = true;
+					} finally {
+						mBoundService.sendMessage("");
+					}
+				}
+			}
+		};
+		buffer.start();
 	}
 
 	private void toggleReady(RadioButton rb) {
@@ -157,7 +154,6 @@ public class HostLobbyActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case R.id.mi_begin:
-        	Toast.makeText(HostLobbyActivity.this, "Begin is Selected", Toast.LENGTH_SHORT).show();
     		toggleReady(myRb);
         	return true;
 
@@ -166,7 +162,7 @@ public class HostLobbyActivity extends Activity {
         	return true;
 
         case R.id.mi_quit:
-        	Toast.makeText(HostLobbyActivity.this, "Quit is Selected", Toast.LENGTH_SHORT).show();
+        	finish();
             return true;
 
         default:
@@ -197,13 +193,45 @@ public class HostLobbyActivity extends Activity {
 				if (rbID > 0) {
 					RadioButton rb = (RadioButton) rgMarkers.findViewById(rbID);
 					myMarker = rb.getTag().toString();
-					
-		        	mBoundService.sendMessage(KEY_CHANGEMYMARKER + "-" + myMarker);
-		        	Toast.makeText(CONTEXT, "Marker " + myMarker + " is now your marker.", Toast.LENGTH_SHORT).show();
+					mBoundService.sendMessage(KEY_CHANGEMYMARKER + "-" + myMarker);
 					dialog.dismiss();
 				} else {
 					Toast.makeText(CONTEXT, "Please select a marker.", Toast.LENGTH_SHORT).show();
 				}
+	    	}
+	    });
+	    
+	    dialog.show();
+	}
+
+	private void popupOptionsDialog() {
+		final Dialog dialog = new Dialog(CONTEXT);
+	    dialog.setContentView(R.layout.dialog_hostoptions);
+	    dialog.setTitle("Options:");
+	    dialog.setCancelable(true);
+
+	    readyOpBtn = (Button) dialog.findViewById(R.id.bHBeginOp);
+	    markerOpBtn = (Button) dialog.findViewById(R.id.bHMarkerOp);
+	    quitOpBtn = (Button) dialog.findViewById(R.id.bHQuitOp);
+	    
+	    readyOpBtn.setOnClickListener(new OnClickListener() {
+	    	@Override
+            public void onClick(View v) {
+	        	toggleReady(myRb);
+	    	}
+	    });
+
+	    markerOpBtn.setOnClickListener(new OnClickListener() {
+	    	@Override
+            public void onClick(View v) {
+	        	popupMarkerDialog();
+	    	}
+	    });
+	    
+	    quitOpBtn.setOnClickListener(new OnClickListener() {
+	    	@Override
+            public void onClick(View v) {
+	        	finish();
 	    	}
 	    });
 	    
@@ -214,6 +242,8 @@ public class HostLobbyActivity extends Activity {
     	String str = msg.obj.toString();
     	
     	if (str.equalsIgnoreCase(KEY_START_GAME)) {
+		    buffer.interrupt();
+		    
     		Intent newIntent = new Intent(CONTEXT, CustomActivity.class);
         	Bundle extras = new Bundle();
 			extras.putString(KEY_USERNAME, username);
@@ -222,34 +252,25 @@ public class HostLobbyActivity extends Activity {
 			newIntent.putExtras(extras);
 			startActivity(newIntent);
     	}
-    	// LOBBY-[]-[]
-    	if (!str.equalsIgnoreCase(KEY_EMPTY_MATCH)) {
+
+    	if (str.equalsIgnoreCase(KEY_MARKERTAKEN)) {
+    		Toast.makeText(CONTEXT, "Marker taken. Please select another marker.", Toast.LENGTH_SHORT).show();
+    	} else if (str.equalsIgnoreCase(KEY_MARKERCHANGED)) {
+    		Toast.makeText(CONTEXT, "Marker " + myMarker + " selected.", Toast.LENGTH_SHORT).show();
+    	}
+    	
+    	System.out.println("STR: " + str.toString());
+    	if (!str.contains(KEY_EMPTY_MATCH)) {
     		String[] list = str.replaceAll("[\\:\\[\\]]+", "").split("[\\-]+");
-		    
-		    if (list[0].equalsIgnoreCase(KEY_HOST_LOBBY)) {
-			    String[] listA = list[1].split("[,\\s]+");
+        	
+		    if (list[0].equalsIgnoreCase(KEY_LOBBY)) {
+	        	
+		    	String[] listA = list[1].split("[,\\s]+");
 			    String[] listB = list[2].split("[,\\s]+");
 			
-			    createRadioButtons(teamARg, listA);
-			    createRadioButtons(teamBRg, listB);
+			    createRadioButtons(teamAHRg, listA);
+			    createRadioButtons(teamBHRg, listB);
 		    }
-    		/*
-    		String[] list = str.replaceAll("[\\:\\[\\]]+", "").split("[\\-]+");
-		    System.out.println("0: " + list[0]);
-		    System.out.println("1: " + list[1]);
-		    System.out.println("2: " + list[2]);
-		    if (list[1] != null && list[0].equalsIgnoreCase(KEY_LOBBY)) {
-		    	String[] listA = list[1].split("[,\\s]+");
-			    createRadioButtons(teamARg, listA);
-		    }
-		    
-		    if (list[2] != null && list[0].equalsIgnoreCase(KEY_LOBBY)) {
-		    	String[] listB = list[2].split("[,\\s]+");
-			    createRadioButtons(teamBRg, listB);
-		    }
-		    */
-    	} else {
-    		Toast.makeText(CONTEXT, "No other players detected.", Toast.LENGTH_SHORT).show();
     	}
     }
     
@@ -259,7 +280,7 @@ public class HostLobbyActivity extends Activity {
         
     	r.removeAllViews();
     	
-        for(int i=1; i<number; i++){
+        for(int i=0; i<number; i++){
             rb[i]  = new RadioButton(this);
             rb[i].setText(l[i]);
             rb[i].setClickable(false);
@@ -299,6 +320,43 @@ public class HostLobbyActivity extends Activity {
 	protected void onDestroy() {
 	    super.onDestroy();
 	    doUnbindService();
+	    interrupted = true;
+	}
+
+	@Override
+	public boolean onDown(MotionEvent arg0) {
+		return false;
+	}
+
+	@Override
+    public boolean onTouchEvent(MotionEvent event) {
+        return detector.onTouchEvent(event);
+    }
+	
+	@Override
+	public boolean onFling(MotionEvent arg0, MotionEvent arg1, float arg2,
+			float arg3) {
+		popupOptionsDialog();
+		return false;
+	}
+
+	@Override
+	public void onLongPress(MotionEvent arg0) {
+	}
+
+	@Override
+	public boolean onScroll(MotionEvent arg0, MotionEvent arg1, float arg2,
+			float arg3) {
+		return false;
+	}
+
+	@Override
+	public void onShowPress(MotionEvent arg0) {
+	}
+
+	@Override
+	public boolean onSingleTapUp(MotionEvent arg0) {
+		return false;
 	}
 	
 } // end of class

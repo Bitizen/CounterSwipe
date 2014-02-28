@@ -32,7 +32,9 @@ public class ServerConnectionActivity extends Activity implements View.OnClickLi
 	private Boolean mIsBound;
 	private ServiceConnection mConnection;
 	
-	private final Context CONTEXT = this;
+	private final Context CONTEXT 					= this;
+	private final int MAXIMUM_IP_ADD_LENGTH			= 15;
+
 	private static final String KEY_GET_USERNAME	= "username: ";
 	
 	@Override
@@ -84,12 +86,31 @@ public class ServerConnectionActivity extends Activity implements View.OnClickLi
 		switch (view.getId()) {
 			case R.id.btnConnectServer:
 				message = serverIpEt.getText().toString().trim(); 
-				serverIp = message;
 				
-				setUpService();
-				startService(new Intent(CONTEXT, SocketService.class));
-		        doBindService();
+				// Checks if IP has exactly 3 dots and are all digits
+				char dot = '.';
+			    int iDots = 0;
+			    int iDigits = 0;
+				for (int i = 0; i < message.length(); i++) {
+				    if (message.charAt(i) == dot) iDots++;
+				    if (Character.isDigit(message.charAt(i))) iDigits++;
+				}
+
+			    int expectedNumDots = 3;
+			    int expectedNumDigits = message.length()-3;
+				if(message.length() <= MAXIMUM_IP_ADD_LENGTH
+						&& iDots == expectedNumDots
+						&& iDigits == expectedNumDigits) {
+					serverIp = message;
+					
+					setUpService();
+					startService(new Intent(CONTEXT, SocketService.class));
+			        doBindService();
+				} else {
+					Toast.makeText(CONTEXT, "Invalid Server IP format.\n[ex. 192.168.0.20]", Toast.LENGTH_LONG).show();
+				}
 				break;
+					
 		}
 	}
 
@@ -98,8 +119,7 @@ public class ServerConnectionActivity extends Activity implements View.OnClickLi
 	}
 	
     private void updateUI(Message msg) {
-    	this.result = msg.obj.toString();
-    	System.out.println("R: " + result);
+    	result = msg.obj.toString();
     	
     	if (result.equalsIgnoreCase(KEY_GET_USERNAME)) {
         	Intent newIntent = new Intent(CONTEXT, LoginActivity.class);

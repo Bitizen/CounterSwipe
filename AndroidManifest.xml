@@ -32,9 +32,11 @@
 		  	android:icon="@drawable/ic_launcher"
 		  	android:label="socket_service" >
 		</service> 
-	
+
         <activity
             android:name=".counterswipe.ServerConnectionActivity"
+		    android:configChanges="orientation"
+		    android:screenOrientation="portrait"
             android:label="@string/app_name" 
             android:theme="@android:style/Theme.NoTitleBar">
             <intent-filter>
@@ -45,43 +47,56 @@
         
         <activity
             android:name=".counterswipe.LoginActivity"
+		    android:configChanges="orientation"
+		    android:screenOrientation="portrait"
             android:label="@string/app_name" 
             android:theme="@android:style/Theme.NoTitleBar" />
         
         <activity
             android:name=".counterswipe.AvailableMatchesActivity"
+		    android:configChanges="orientation"
+		    android:screenOrientation="portrait"
             android:label="@string/app_name" 
             android:theme="@android:style/Theme.NoTitleBar" />
         
         <activity
             android:name=".counterswipe.TeamSelectActivity"
+		    android:configChanges="orientation"
+		    android:screenOrientation="portrait"
             android:label="@string/app_name" 
             android:theme="@android:style/Theme.NoTitleBar" />
         
         <activity
             android:name=".counterswipe.LobbyActivity"
+		    android:configChanges="orientation"
+		    android:screenOrientation="portrait"
             android:label="@string/app_name" 
             android:theme="@android:style/Theme.NoTitleBar" />
         
         <activity
             android:name=".counterswipe.HostLobbyActivity"
+		    android:configChanges="orientation"
+		    android:screenOrientation="portrait"
             android:label="@string/app_name" 
             android:theme="@android:style/Theme.NoTitleBar" />
         
      	<activity
             android:name=".counterswipe.ResultsActivity"
+		    android:configChanges="orientation"
             android:label="@string/app_name"
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.NoTitleBar" />
      	
      	<activity
             android:name=".counterswipe.CustomActivity"
+		    android:configChanges="orientation"
             android:label="@string/app_name"
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />
      	
      	<activity
             android:name=".counterswipe.BlackSplashActivity"
+		    android:configChanges="orientation"
             android:label="@string/app_name"
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />
