@@ -2,24 +2,28 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:background="@drawable/lobby" >
 
     <TextView
+        android:id="@+id/tvHLTitle"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="LOBBY" 
+        android:text="lobby" 
         android:textSize="25sp"
+        android:textColor="#000000"
         android:gravity="center"
-        android:layout_margin="5sp"
-        android:layout_marginTop="20sp"/>
+        android:layout_margin="20sp"/>
 
     <TextView
+        android:id="@+id/tvHLteamA"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="15sp"
+        android:textSize="20sp"
+        android:textColor="#000000"
         android:layout_gravity="center"
         android:layout_marginTop="25sp"
-        android:text="Team A" />
+        android:text="team a" />
  	
  	<RadioGroup
         android:layout_width="wrap_content"
@@ -30,12 +34,14 @@
     </RadioGroup>
     
     <TextView
+        android:id="@+id/tvHLteamB"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="15sp"
+        android:textSize="20sp"
+        android:textColor="#000000"
         android:layout_gravity="center"
         android:layout_marginTop="25sp"
-        android:text="Team B" />
+        android:text="team b" />
     
  	<RadioGroup
         android:layout_width="wrap_content"

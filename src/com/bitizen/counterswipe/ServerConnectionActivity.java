@@ -9,6 +9,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -20,6 +21,7 @@ import android.widget.Toast;
 
 public class ServerConnectionActivity extends Activity implements View.OnClickListener{
 
+	private Typeface typeFace;
 	private EditText serverIpEt;
 	private Button connectBtn;
 	
@@ -40,6 +42,7 @@ public class ServerConnectionActivity extends Activity implements View.OnClickLi
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		typeFace = Typeface.createFromAsset(getAssets(),"fonts/Antipasto_extrabold.otf");
 		setContentView(R.layout.activity_connecttoserver);
 		initializeElements();
         
@@ -54,7 +57,9 @@ public class ServerConnectionActivity extends Activity implements View.OnClickLi
 		
 		connectBtn = (Button) findViewById(R.id.btnConnectServer);
 		serverIpEt = (EditText) findViewById(R.id.etServerIp);
-
+		
+		connectBtn.setTypeface(typeFace);
+		serverIpEt.setTypeface(typeFace);
 	}
 
 	private void setUpService() {

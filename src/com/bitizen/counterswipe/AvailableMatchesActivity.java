@@ -9,10 +9,13 @@ import java.util.concurrent.ExecutorService;
 import com.bitizen.R;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -26,13 +29,14 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class AvailableMatchesActivity extends Activity implements View.OnClickListener{
+public class AvailableMatchesActivity extends Activity {
 
+	private Typeface typeFace;
 	private LinearLayout matchesLl;
-	private TextView usernameTv;
-	//private Button nextBtn;
+	private TextView usernameTv, titleTv;
 	private RadioGroup matchesRg;
-
+	private Button logoutBtn;
+	
 	private String result;
 	private String message;
 	private String username;
@@ -50,6 +54,7 @@ public class AvailableMatchesActivity extends Activity implements View.OnClickLi
 	private final String KEY_MATCH 					= "match";
 	private final String KEY_LIST_MATCHES 			= "Matches";
 	private final String KEY_PICKMATCH				= "PICKMATCH-";
+	private final String KEY_LOGOUT					= "LOGOUT";
 	
 	private static final String KEY_SHOWMATCHES		= "SHOWMATCHES";
 	private static final String KEY_MATCH_AVAIL 	= "available";
@@ -58,6 +63,9 @@ public class AvailableMatchesActivity extends Activity implements View.OnClickLi
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		typeFace = Typeface.createFromAsset(getAssets(),"fonts/Antipasto_extrabold.otf");
+
 		setContentView(R.layout.activity_availablematches);
 	    initializeElements();
 		
@@ -65,11 +73,9 @@ public class AvailableMatchesActivity extends Activity implements View.OnClickLi
 	    if (extras != null) {
 	        Intent intent = getIntent();
 	        String str = intent.getStringExtra(KEY_USERNAME);
-	        usernameTv.setText("USERNAME: " + str);
+	        usernameTv.setText("USERNAME [ " + str + " ]");
 	        username = str;
 	    }
-		
-	    //nextBtn.setOnClickListener(this);
 		
 		startService(new Intent(CONTEXT, SocketService.class));
         doBindService();
@@ -83,8 +89,11 @@ public class AvailableMatchesActivity extends Activity implements View.OnClickLi
 		
 		matchesLl = (LinearLayout) findViewById(R.id.llAvailableMatches);
 		usernameTv = (TextView) findViewById(R.id.tvUsernameInAM);
-	    //nextBtn = (Button) findViewById(R.id.btnNext);
 	    matchesRg = (RadioGroup) findViewById(R.id.rgAvailableMatches);
+		titleTv = (TextView) findViewById(R.id.tvAMtitle);
+
+		usernameTv.setTypeface(typeFace);
+		titleTv.setTypeface(typeFace);
 
 		mBoundService = new SocketService();
 		mConnection = new ServiceConnection() {
@@ -112,7 +121,7 @@ public class AvailableMatchesActivity extends Activity implements View.OnClickLi
 			public void run() {
 				while(!interrupted) {
 					try {
-						sleep(500);
+						sleep(1000);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 						interrupted = true;
@@ -124,34 +133,27 @@ public class AvailableMatchesActivity extends Activity implements View.OnClickLi
 		};
 		buffer.start();
 	}
-	
-	@Override
-	public void onClick(View view) {
-		/*
-		switch (view.getId()) {
-			case R.id.btnNext:
-				
-				int radioButtonID = matchesRg.getCheckedRadioButtonId();
-				//System.out.println("rbid: " + radioButtonID);
-				
-				if (radioButtonID > 0) {
-					RadioButton rb = (RadioButton) matchesRg.findViewById(radioButtonID);
-					
-					String m = rb.getText().toString();
-					match = m;
-					//System.out.println(m);
-	
-					message = m; 
-					if (mBoundService != null) {
-					    mBoundService.sendMessage(KEY_PICKMATCH + message);
-					}
-				} else {
-					Toast.makeText(CONTEXT, "Please select a match.", Toast.LENGTH_SHORT).show();
-				}
-				break;
-		}
-		*/
-		
+
+	private void popupLogoutDialog() {
+		final Dialog dialog = new Dialog(CONTEXT);
+	    dialog.setContentView(R.layout.dialog_logout);
+	    dialog.setTitle("Are you sure you want to logout?");
+	    dialog.setCancelable(true);
+
+	    logoutBtn = (Button) dialog.findViewById(R.id.bLogout);
+	    logoutBtn.setTypeface(typeFace);
+	    logoutBtn.setOnClickListener(new OnClickListener() {
+	    	@Override
+            public void onClick(View v) {
+	    		buffer.interrupt();
+	    		mBoundService.sendMessage(KEY_LOGOUT);
+	    		
+				Intent intent = ResultsActivity.getIntent(getApplicationContext(), LoginActivity.class);
+				startActivity(intent);
+	    	}
+	    });
+
+	    dialog.show();
 	}
 	
     private void updateUI(Message msg) {
@@ -184,6 +186,8 @@ public class AvailableMatchesActivity extends Activity implements View.OnClickLi
             rb[i]  = new RadioButton(this);
             matchesRg.addView(rb[i]);
             rb[i].setText(l[i]);
+            rb[i].setTypeface(typeFace);
+            rb[i].setTextColor(Color.BLACK);
             final String msg = rb[i].getText().toString();
             rb[i].setOnClickListener(new OnClickListener() {
 				@Override
@@ -212,12 +216,17 @@ public class AvailableMatchesActivity extends Activity implements View.OnClickLi
 	       mIsBound = false;
 	   }
 	}
-	
+
+	@Override
+	public void onBackPressed() {
+		popupLogoutDialog();
+	}
+
 	@Override
 	protected void onDestroy() {
 	    super.onDestroy();
 	    doUnbindService();
-	    interrupted = true;
+	    buffer.interrupt();
 	}
 	
 } //end of class 

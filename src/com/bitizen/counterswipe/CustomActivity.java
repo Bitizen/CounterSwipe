@@ -58,6 +58,7 @@ public class CustomActivity extends AndARActivity implements OnGestureListener {
 	private SocketService mBoundService;
 	private Boolean mIsBound;
 	private ServiceConnection mConnection;
+	private Thread buffer;
 	
 	private final Context CONTEXT 					= this;
 	private final String KEY_USERNAME 				= "username";
@@ -68,6 +69,8 @@ public class CustomActivity extends AndARActivity implements OnGestureListener {
 	private static final String KEY_HIT				= "HIT-";
 	private static final String KEY_GET_HIT			= "GETHIT";
 	private static final String KEY_GAMEOVER		= "GAMEOVER";
+	private static final String KEY_GAMEWON			= "GAMEWON";
+	private static final String KEY_WIN_TEAM		= "winteam";
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -142,14 +145,14 @@ public class CustomActivity extends AndARActivity implements OnGestureListener {
 
 		}		
 		
-		final Thread buffer = new Thread() {
+		buffer = new Thread() {
 			@Override
 			public void run() {
 				while (!interrupted) {
 					try {
 						sleep(1000);
 					} catch (InterruptedException e) {
-						
+						interrupted = true;
 					} finally {
 						mBoundService.sendMessage("");
 					}
@@ -285,12 +288,24 @@ public class CustomActivity extends AndARActivity implements OnGestureListener {
 	    if (str.equalsIgnoreCase(KEY_GET_HIT)) {
 			getHit();
 		} else if (str.equalsIgnoreCase(KEY_GAMEOVER)) {
-		    interrupted = true;
+		    buffer.interrupt();
+		    
     		Intent newIntent = new Intent(CONTEXT, BlackSplashActivity.class);
     		Bundle extras = new Bundle();
 			extras.putString(KEY_USERNAME, username);
 			extras.putString(KEY_MATCH, match);
 			extras.putString(KEY_TEAM, team);
+			newIntent.putExtras(extras);
+			startActivity(newIntent);
+		} else if (str.equalsIgnoreCase(KEY_GAMEWON)) {
+			buffer.interrupt();
+		    
+    		Intent newIntent = new Intent(CONTEXT, ResultsActivity.class);
+    		Bundle extras = new Bundle();
+			extras.putString(KEY_USERNAME, username);
+			extras.putString(KEY_MATCH, match);
+			extras.putString(KEY_TEAM, team);
+			extras.putString(KEY_WIN_TEAM, team);
 			newIntent.putExtras(extras);
 			startActivity(newIntent);
 		}
@@ -369,6 +384,7 @@ public class CustomActivity extends AndARActivity implements OnGestureListener {
 			
 			--ammo;
 			
+			/*// TODO make compatible with all [isWithinCrosshairs]
 			if (marker1.isVisible() && isWithinCrosshairs(marker1)) {
 				//Toast.makeText(this, marker1.getPoint().toString() + " - RED [M1] HIT", Toast.LENGTH_SHORT).show();
 				mBoundService.sendMessage(KEY_HIT + username + "-1");
@@ -386,10 +402,37 @@ public class CustomActivity extends AndARActivity implements OnGestureListener {
 				mBoundService.sendMessage(KEY_HIT + username + "-4");
 				sound.playShortResource(R.raw.hit);
 			} else if(marker5.isVisible() && isWithinCrosshairs(marker5)) {
-				//Toast.makeText(this, marker5.getPoint().toString() + " - ORANGE [M5] HIT", Toast.LENGTH_SHORT).show();
+				Toast.makeText(this, marker5.getPoint().toString() + " - ORANGE [M5] HIT", Toast.LENGTH_SHORT).show();
 				mBoundService.sendMessage(KEY_HIT + username + "-5");
 				sound.playShortResource(R.raw.hit);
 			} else if(marker6.isVisible() && isWithinCrosshairs(marker6)) {
+				Toast.makeText(this, marker6.getPoint().toString() + " - PURPLE [M6] HIT", Toast.LENGTH_SHORT).show();
+				mBoundService.sendMessage(KEY_HIT + username + "-6");
+				sound.playShortResource(R.raw.hit);
+			} else {
+				sound.playShortResource(R.raw.miss);
+			}*/
+			if (marker1.isVisible()) {
+				//Toast.makeText(this, marker1.getPoint().toString() + " - RED [M1] HIT", Toast.LENGTH_SHORT).show();
+				mBoundService.sendMessage(KEY_HIT + username + "-1");
+				sound.playShortResource(R.raw.hit);
+			} else if (marker2.isVisible()) {
+				//Toast.makeText(this, marker2.getPoint().toString() + " - BLUE [M2] HIT", Toast.LENGTH_SHORT).show();
+				mBoundService.sendMessage(KEY_HIT + username + "-2");
+				sound.playShortResource(R.raw.hit);
+			} else if (marker3.isVisible()) {
+				//Toast.makeText(this, marker3.getPoint().toString() + " - YELLOW [M3] HIT", Toast.LENGTH_SHORT).show();
+				mBoundService.sendMessage(KEY_HIT + username + "-3");
+				sound.playShortResource(R.raw.hit);
+			} else if (marker4.isVisible()) {
+				//Toast.makeText(this, marker4.getPoint().toString() + " - GREEN [M4] HIT", Toast.LENGTH_SHORT).show();
+				mBoundService.sendMessage(KEY_HIT + username + "-4");
+				sound.playShortResource(R.raw.hit);
+			} else if(marker5.isVisible()) {
+				//Toast.makeText(this, marker5.getPoint().toString() + " - ORANGE [M5] HIT", Toast.LENGTH_SHORT).show();
+				mBoundService.sendMessage(KEY_HIT + username + "-5");
+				sound.playShortResource(R.raw.hit);
+			} else if(marker6.isVisible()) {
 				//Toast.makeText(this, marker6.getPoint().toString() + " - PURPLE [M6] HIT", Toast.LENGTH_SHORT).show();
 				mBoundService.sendMessage(KEY_HIT + username + "-6");
 				sound.playShortResource(R.raw.hit);
@@ -421,12 +464,29 @@ public class CustomActivity extends AndARActivity implements OnGestureListener {
 	       mIsBound = false;
 	   }
 	}
+
+	@Override
+	public void onBackPressed() {
+		// Toast.makeText(CONTEXT, "BACK", Toast.LENGTH_SHORT).show();
+	}
 	
+	@Override
+	protected void onPause() {
+		// TODO Auto-generated method stub
+		super.onPause();
+	}
+
+	@Override
+	protected void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+	}
+
 	@Override
 	protected void onDestroy() {
 	    super.onDestroy();
 	    doUnbindService();
-	    interrupted = true;
+	    buffer.interrupt();
 	    sound.release();
 	}
 	

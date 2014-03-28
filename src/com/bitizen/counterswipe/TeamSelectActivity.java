@@ -7,6 +7,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -19,17 +20,11 @@ import android.widget.Toast;
 
 public class TeamSelectActivity extends Activity implements View.OnClickListener {
 	
+	private Typeface typeFace;
 	private TextView usernameTv, matchTv;
 	private Button teamABtn, teamBBtn;
 
 	private String team;
-	
-	private final Context CONTEXT = this;
-	private final String KEY_USERNAME = "username";
-	private final String KEY_MATCH = "match";
-	private final String KEY_TEAM = "team";
-
-	private String result;
 	private String message;
 	private String username, match;
 	
@@ -37,22 +32,19 @@ public class TeamSelectActivity extends Activity implements View.OnClickListener
 	private SocketService mBoundService;
 	private Boolean mIsBound;
 	private ServiceConnection mConnection;
-	
-	private static final String KEY_GET_USERNAME	= "username: ";
-	private static final String KEY_USERNAME_AVAIL 	= "uname available!";
-	private static final String KEY_USERNAME_TAKEN 	= "uname taken";
-	private static final String KEY_MATCH_AVAIL 	= "available";
-	private static final String KEY_MATCH_FULL 		= "full";
-	private static final String KEY_TEAM_AVAIL 		= "team available";
-	private static final String KEY_TEAM_FULL 		= "team full";
-	private static final String KEY_INVALID			= "invalid";
-	private static final String KEY_READY_USER 		= "waiting for user ready...";
-	private static final String KEY_READY_MATCH 	= "waiting for match ready...";
-	private static final String KEY_START_GAME 		= "start game";
+
+	private final Context CONTEXT 					 = this;
+	private final String KEY_USERNAME 				 = "username";
+	private final String KEY_MATCH 					 = "match";
+	private final String KEY_TEAM 					 = "team";
+	private final String KEY_TEAM_AVAIL 			 = "team available";
+	private final String KEY_TEAM_FULL 				 = "team full";
+	private final String KEY_LEAVEMATCH				 = "LEAVEMATCH";
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		typeFace = Typeface.createFromAsset(getAssets(),"fonts/Antipasto_extrabold.otf");
 		setContentView(R.layout.activity_teamselect);
 		initializeElements();
 		
@@ -61,8 +53,7 @@ public class TeamSelectActivity extends Activity implements View.OnClickListener
 			username = extras.getString(KEY_USERNAME);
 			match = extras.getString(KEY_MATCH);
 
-			usernameTv.setText("USERNAME: " + username);
-			matchTv.setText("MATCH : " + match);
+			usernameTv.setText("USERNAME [ " + username + " ]   ||   MATCH [ " + match+ " ]");
 		}
 		
 		teamABtn.setOnClickListener(this);
@@ -73,7 +64,6 @@ public class TeamSelectActivity extends Activity implements View.OnClickListener
 	}
 
 	private void initializeElements() {
-		result = new String();
 		message = new String();
 		username = new String();
 		match = new String();
@@ -84,6 +74,11 @@ public class TeamSelectActivity extends Activity implements View.OnClickListener
 		teamABtn = (Button) findViewById(R.id.btnTeamA);
 		teamBBtn = (Button) findViewById(R.id.btnTeamB);
 		
+		usernameTv.setTypeface(typeFace);
+		matchTv.setTypeface(typeFace);
+		teamABtn.setTypeface(typeFace);
+		teamBBtn.setTypeface(typeFace);
+
 		mBoundService = new SocketService();
 		mConnection = new ServiceConnection() {
 			@Override
@@ -159,6 +154,17 @@ public class TeamSelectActivity extends Activity implements View.OnClickListener
 	       unbindService(mConnection);
 	       mIsBound = false;
 	   }
+	}
+
+	@Override
+	public void onBackPressed() {
+		mBoundService.sendMessage(KEY_LEAVEMATCH);
+		
+		Intent intent = ResultsActivity.getIntent(getApplicationContext(), AvailableMatchesActivity.class);
+		Bundle extras = new Bundle();
+		extras.putString(KEY_USERNAME, username);
+		intent.putExtras(extras);
+		startActivity(intent);
 	}
 	
 	@Override

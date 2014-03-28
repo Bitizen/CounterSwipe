@@ -8,6 +8,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -26,14 +28,17 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class HostLobbyActivity extends Activity implements OnGestureListener {
 
+	private Typeface typeFace;
+	private TextView titleTv, tATv, tBTv;
 	private RadioButton myRb;
 	private RadioButton rbM1, rbM2, rbM3, rbM4, rbM5, rbM6;
 	private RadioGroup teamAHRg, teamBHRg, rgMarkers;
-	private Button setMarkerB, readyOpBtn, markerOpBtn, quitOpBtn;
+	private Button setMarkerB, readyOpBtn, markerOpBtn, quitOpBtn, logoutBtn;
 
 	private String username, match, team;
 	private String myMarker;
@@ -58,12 +63,17 @@ public class HostLobbyActivity extends Activity implements OnGestureListener {
 	private final String KEY_CHANGEMYMARKER 	= "CHANGEMYMARKER";
 	private final String KEY_MARKERTAKEN		= "MARKERTAKEN";
 	private final String KEY_MARKERCHANGED		= "MARKERCHANGED";
+	private final String KEY_QUITHOSTING		= "QUITHOSTING";
+	private final String KEY_LOGOUT				= "LOGOUT";
 
 	private static final String KEY_START_GAME 		= "start game";
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		typeFace = Typeface.createFromAsset(getAssets(),"fonts/Antipasto_extrabold.otf");
+
 		setContentView(R.layout.activity_hostlobby);
 		initializeElements();
 		
@@ -87,6 +97,14 @@ public class HostLobbyActivity extends Activity implements OnGestureListener {
 		
 		teamAHRg = (RadioGroup) findViewById(R.id.rgHTeamA);
 		teamBHRg = (RadioGroup) findViewById(R.id.rgHTeamB);
+
+		titleTv = (TextView) findViewById(R.id.tvHLTitle);
+		tATv = (TextView) findViewById(R.id.tvHLteamA);
+		tBTv = (TextView) findViewById(R.id.tvHLteamB);
+
+		titleTv.setTypeface(typeFace);
+		tATv.setTypeface(typeFace);
+		tBTv.setTypeface(typeFace);
 		
 		mBoundService = new SocketService();
 		mConnection = new ServiceConnection() {
@@ -162,7 +180,14 @@ public class HostLobbyActivity extends Activity implements OnGestureListener {
         	return true;
 
         case R.id.mi_quit:
-        	finish();
+        	mBoundService.sendMessage(KEY_QUITHOSTING);
+    	    buffer.interrupt();
+
+			Intent intent = ResultsActivity.getIntent(getApplicationContext(), AvailableMatchesActivity.class);
+    		Bundle extras = new Bundle();
+			extras.putString(KEY_USERNAME, username);
+			intent.putExtras(extras);
+			startActivity(intent);
             return true;
 
         default:
@@ -174,6 +199,7 @@ public class HostLobbyActivity extends Activity implements OnGestureListener {
 		final Dialog dialog = new Dialog(CONTEXT);
 	    dialog.setContentView(R.layout.dialog_changemymarker);
 	    dialog.setTitle("Select your marker:");
+	    //dialog.setTypeface(typeFace);
 	    dialog.setCancelable(true);
 
 	    rgMarkers = (RadioGroup) dialog.findViewById(R.id.rgMarkers);
@@ -184,7 +210,8 @@ public class HostLobbyActivity extends Activity implements OnGestureListener {
 	    rbM5 = (RadioButton) dialog.findViewById(R.id.rbM5);
 	    rbM6 = (RadioButton) dialog.findViewById(R.id.rbM6);
 	    setMarkerB = (Button) dialog.findViewById(R.id.bSetMyMarker);
-	    
+	    setMarkerB.setTypeface(typeFace);
+
 	    setMarkerB.setOnClickListener(new OnClickListener() {
 	    	@Override
             public void onClick(View v) {
@@ -208,12 +235,17 @@ public class HostLobbyActivity extends Activity implements OnGestureListener {
 		final Dialog dialog = new Dialog(CONTEXT);
 	    dialog.setContentView(R.layout.dialog_hostoptions);
 	    dialog.setTitle("Options:");
+		//dialog.setTypeface(typeFace);
 	    dialog.setCancelable(true);
 
 	    readyOpBtn = (Button) dialog.findViewById(R.id.bHBeginOp);
 	    markerOpBtn = (Button) dialog.findViewById(R.id.bHMarkerOp);
 	    quitOpBtn = (Button) dialog.findViewById(R.id.bHQuitOp);
 	    
+	    readyOpBtn.setTypeface(typeFace);
+	    markerOpBtn.setTypeface(typeFace);
+	    quitOpBtn.setTypeface(typeFace);
+
 	    readyOpBtn.setOnClickListener(new OnClickListener() {
 	    	@Override
             public void onClick(View v) {
@@ -231,10 +263,40 @@ public class HostLobbyActivity extends Activity implements OnGestureListener {
 	    quitOpBtn.setOnClickListener(new OnClickListener() {
 	    	@Override
             public void onClick(View v) {
-	        	finish();
+	    		mBoundService.sendMessage(KEY_QUITHOSTING);
+	    		buffer.interrupt();
+	    		
+				Intent intent = ResultsActivity.getIntent(getApplicationContext(), AvailableMatchesActivity.class);
+	    		Bundle extras = new Bundle();
+				extras.putString(KEY_USERNAME, username);
+				intent.putExtras(extras);
+				startActivity(intent);
 	    	}
 	    });
 	    
+	    dialog.show();
+	}
+	
+	private void popupLogoutDialog() {
+		final Dialog dialog = new Dialog(CONTEXT);
+	    dialog.setContentView(R.layout.dialog_logout);
+	    dialog.setTitle("Are you sure you want to logout?");
+	    //dialog.setTypeface(typeFace);
+	    dialog.setCancelable(true);
+
+	    logoutBtn = (Button) dialog.findViewById(R.id.bLogout);
+	    logoutBtn.setTypeface(typeFace);
+	    logoutBtn.setOnClickListener(new OnClickListener() {
+	    	@Override
+            public void onClick(View v) {
+	    		mBoundService.sendMessage(KEY_LOGOUT);
+	    		buffer.interrupt();
+	    		
+				Intent intent = ResultsActivity.getIntent(getApplicationContext(), LoginActivity.class);
+				startActivity(intent);
+	    	}
+	    });
+
 	    dialog.show();
 	}
 	
@@ -285,6 +347,9 @@ public class HostLobbyActivity extends Activity implements OnGestureListener {
             rb[i].setText(l[i]);
             rb[i].setClickable(false);
             rb[i].setTextSize(15.0f);
+            rb[i].setTypeface(typeFace);
+            rb[i].setTextColor(Color.BLACK);
+            
             LinearLayout.LayoutParams params = new LinearLayout
             		.LayoutParams(LayoutParams.MATCH_PARENT
             		, LayoutParams.MATCH_PARENT, Gravity.TOP);
@@ -316,13 +381,6 @@ public class HostLobbyActivity extends Activity implements OnGestureListener {
 	   }
 	}
 	
-	@Override
-	protected void onDestroy() {
-	    super.onDestroy();
-	    doUnbindService();
-	    interrupted = true;
-	}
-
 	@Override
 	public boolean onDown(MotionEvent arg0) {
 		return false;
@@ -357,6 +415,18 @@ public class HostLobbyActivity extends Activity implements OnGestureListener {
 	@Override
 	public boolean onSingleTapUp(MotionEvent arg0) {
 		return false;
+	}
+
+	@Override
+	public void onBackPressed() {
+		popupLogoutDialog();
+	}
+
+	@Override
+	protected void onDestroy() {
+	    super.onDestroy();
+	    doUnbindService();
+	    buffer.interrupt();
 	}
 	
 } // end of class

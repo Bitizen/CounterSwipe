@@ -2,25 +2,16 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
-    
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="CounterSwipe" 
-        android:gravity="center"
-        android:textSize="40sp"
-        android:padding="10sp"
-        android:paddingBottom="20sp"
-        android:fontFamily="Calibri" />
-
+    android:orientation="vertical"
+    android:background="@drawable/serveripscreen" >
+   
     <EditText
         android:id="@+id/etServerIp"
-        android:layout_width="250dp"
+        android:layout_width="210dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="80dp"
+        android:layout_marginTop="160dp"
         android:layout_gravity="center"
-        android:hint="ENTER SERVER IP"
+        android:hint="server ip address"
         android:password="false"
         android:ems="10" >
 	    <requestFocus />
@@ -32,7 +23,8 @@
         android:layout_height="70dp"
         android:layout_marginTop="30dp"
         android:layout_gravity="center"
-        android:text="CONNECT"
-        android:padding="10dp" />
+        android:text="connect"
+        android:padding="10dp"
+        android:background="@drawable/shapebutton" />
 
 </LinearLayout>

@@ -2,25 +2,30 @@ package com.bitizen.counterswipe;
 
 import com.bitizen.R;
 
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class LoginActivity extends Activity implements View.OnClickListener{
 
+	private Typeface typeFace;
 	private EditText usernameEt;
-	private Button joinBtn;
-	private Button hostBtn;
+	private TextView dialogTv;
+	private Button joinBtn, hostBtn, quitGameBtn;
 	
 	private String result;
 	private String message;
@@ -49,6 +54,9 @@ public class LoginActivity extends Activity implements View.OnClickListener{
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		typeFace = Typeface.createFromAsset(getAssets(),"fonts/Antipasto_extrabold.otf");
+
 		setContentView(R.layout.activity_login);
 		initializeElements();
         
@@ -66,7 +74,13 @@ public class LoginActivity extends Activity implements View.OnClickListener{
 		joinBtn = (Button) findViewById(R.id.btnJoin);
 		hostBtn = (Button) findViewById(R.id.btnHost);
 		usernameEt = (EditText) findViewById(R.id.etUsername);
-
+		dialogTv = (TextView) findViewById(R.id.tvDialogBird);
+		
+		joinBtn.setTypeface(typeFace);
+		hostBtn.setTypeface(typeFace);
+		usernameEt.setTypeface(typeFace);
+		dialogTv.setTypeface(typeFace);
+		
 		mBoundService = new SocketService();
 		mConnection = new ServiceConnection() {
 			@Override
@@ -112,7 +126,26 @@ public class LoginActivity extends Activity implements View.OnClickListener{
 			}
 		}
 	}
+	
+	// TODO quit
+	private void popupQuitDialog() {
+		final Dialog dialog = new Dialog(CONTEXT);
+	    dialog.setContentView(R.layout.dialog_quit);
+	    dialog.setTitle("Are you sure you want to quit?");
+	    dialog.setCancelable(true);
 
+	    quitGameBtn = (Button) dialog.findViewById(R.id.bQuitGame);
+	    
+	    quitGameBtn.setOnClickListener(new OnClickListener() {
+	    	@Override
+            public void onClick(View v) {
+	    		finish();
+	    	}
+	    });
+
+	    dialog.show();
+	}
+		
     private void updateUI(Message msg) {
     	this.result = msg.obj.toString();
     	System.out.println("R: " + result);
@@ -153,6 +186,12 @@ public class LoginActivity extends Activity implements View.OnClickListener{
 	       unbindService(mConnection);
 	       mIsBound = false;
 	   }
+	}
+	
+	// TODO
+	@Override
+	public void onBackPressed() {
+		popupQuitDialog();
 	}
 	
 	@Override

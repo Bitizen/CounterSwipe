@@ -8,6 +8,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -26,14 +28,18 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class LobbyActivity extends Activity implements OnGestureListener {
 
+	private Typeface typeFace;
+	private TextView titleTv, tATv, tBTv;
 	private RadioButton myRb;
 	private RadioButton rbM1, rbM2, rbM3, rbM4, rbM5, rbM6;
 	private RadioGroup teamARg, teamBRg, rgMarkers;
-	private Button setMarkerB, readyOpBtn, markerOpBtn;
+	private Button setMarkerB, readyOpBtn, markerOpBtn
+		, leaveMatchBtn, leaveTeamBtn, logoutBtn;
 
 	private String myMarker;
 	private String username, match, team;
@@ -58,12 +64,19 @@ public class LobbyActivity extends Activity implements OnGestureListener {
 	private final String KEY_CHANGEMYMARKER			 = "CHANGEMYMARKER";
 	private final String KEY_MARKERTAKEN			 = "MARKERTAKEN";
 	private final String KEY_MARKERCHANGED			 = "MARKERCHANGED";
+	private final String KEY_HOSTHASLEFT		     = "hosthasleft";
+	private final String KEY_LOGOUT					 = "LOGOUT";
+	private final String KEY_LEAVETEAM				 = "LEAVETEAM";
+	private final String KEY_LEAVEMATCH 		 	 = "leavematch";
 	
 	private static final String KEY_START_GAME 		 = "start game";
     
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		typeFace = Typeface.createFromAsset(getAssets(),"fonts/Antipasto_extrabold.otf");
+		
 		setContentView(R.layout.activity_lobby);
 		initializeElements();
 
@@ -86,6 +99,14 @@ public class LobbyActivity extends Activity implements OnGestureListener {
 		
 		teamARg = (RadioGroup) findViewById(R.id.rgTeamA);
 		teamBRg = (RadioGroup) findViewById(R.id.rgTeamB);
+		
+		titleTv = (TextView) findViewById(R.id.tvLobbyTitle);
+		tATv = (TextView) findViewById(R.id.teamATv);
+		tBTv = (TextView) findViewById(R.id.teamBTv);
+
+		titleTv.setTypeface(typeFace);
+		tATv.setTypeface(typeFace);
+		tBTv.setTypeface(typeFace);
 		
 		mBoundService = new SocketService();
 		mConnection = new ServiceConnection() {
@@ -167,6 +188,7 @@ public class LobbyActivity extends Activity implements OnGestureListener {
 		final Dialog dialog = new Dialog(CONTEXT);
 	    dialog.setContentView(R.layout.dialog_changemymarker);
 	    dialog.setTitle("Select your marker:");
+	    //dialog.setTypeface(typeFace);
 	    dialog.setCancelable(true);
 
 	    rgMarkers = (RadioGroup) dialog.findViewById(R.id.rgMarkers);
@@ -177,7 +199,8 @@ public class LobbyActivity extends Activity implements OnGestureListener {
 	    rbM5 = (RadioButton) dialog.findViewById(R.id.rbM5);
 	    rbM6 = (RadioButton) dialog.findViewById(R.id.rbM6);
 	    setMarkerB = (Button) dialog.findViewById(R.id.bSetMyMarker);
-	    
+	    setMarkerB.setTypeface(typeFace);
+
 	    setMarkerB.setOnClickListener(new OnClickListener() {
 	    	@Override
             public void onClick(View v) {
@@ -200,12 +223,16 @@ public class LobbyActivity extends Activity implements OnGestureListener {
 	private void popupOptionsDialog() {
 		final Dialog dialog = new Dialog(CONTEXT);
 	    dialog.setContentView(R.layout.dialog_options);
-	    dialog.setTitle("Options:");
+	    dialog.setTitle("Game Options:");
+	    //dialog.setTypeface(typeFace);
 	    dialog.setCancelable(true);
 
 	    readyOpBtn = (Button) dialog.findViewById(R.id.bReadyOp);
 	    markerOpBtn = (Button) dialog.findViewById(R.id.bMarkerOp);
 	    
+	    readyOpBtn.setTypeface(typeFace);
+	    markerOpBtn.setTypeface(typeFace);
+
 	    readyOpBtn.setOnClickListener(new OnClickListener() {
 	    	@Override
             public void onClick(View v) {
@@ -222,10 +249,79 @@ public class LobbyActivity extends Activity implements OnGestureListener {
 	    
 	    dialog.show();
 	}
-	
+
+	private void popupPlayerOptionsDialog() {
+		final Dialog dialog = new Dialog(CONTEXT);
+	    dialog.setContentView(R.layout.dialog_playeroptions);
+	    dialog.setTitle("Player Options:");
+	    //dialog.setTypeface(typeFace);
+	    dialog.setCancelable(true);
+	    
+	    leaveMatchBtn = (Button) dialog.findViewById(R.id.bPLeaveMatch);
+	    leaveTeamBtn = (Button) dialog.findViewById(R.id.bPLeaveTeam);
+	    logoutBtn = (Button) dialog.findViewById(R.id.bPLogout);
+
+		leaveMatchBtn.setTypeface(typeFace);
+	    leaveTeamBtn.setTypeface(typeFace);
+	    logoutBtn.setTypeface(typeFace);
+
+	    leaveMatchBtn.setOnClickListener(new OnClickListener() {
+	    	@Override
+            public void onClick(View v) {
+	    		buffer.interrupt();
+	    		mBoundService.sendMessage(KEY_LEAVEMATCH);
+	    		
+				Intent intent = ResultsActivity.getIntent(getApplicationContext(), AvailableMatchesActivity.class);
+				Bundle extras = new Bundle();
+				extras.putString(KEY_USERNAME, username);
+				intent.putExtras(extras);
+				startActivity(intent);
+	    	}
+	    });
+
+	    leaveTeamBtn.setOnClickListener(new OnClickListener() {
+	    	@Override
+            public void onClick(View v) {
+	    		buffer.interrupt();
+	    		mBoundService.sendMessage(KEY_LEAVETEAM);
+	    		
+				Intent intent = ResultsActivity.getIntent(getApplicationContext(), TeamSelectActivity.class);
+				Bundle extras = new Bundle();
+				extras.putString(KEY_USERNAME, username);
+				extras.putString(KEY_MATCH, match);
+				intent.putExtras(extras);
+				startActivity(intent);
+	    	}
+	    });
+
+	    logoutBtn.setOnClickListener(new OnClickListener() {
+	    	@Override
+            public void onClick(View v) {
+	    		buffer.interrupt();
+	    		mBoundService.sendMessage(KEY_LOGOUT);
+	    		
+				Intent intent = ResultsActivity.getIntent(getApplicationContext(), LoginActivity.class);
+				startActivity(intent);
+	    	}
+	    });
+
+	    dialog.show();
+	}
+		
 	private void updateUI(Message msg) {
 	    String str = msg.obj.toString();
 	    	
+	    // TODO handle host quit
+	    if (str.equalsIgnoreCase(KEY_HOSTHASLEFT)) {
+		    buffer.interrupt();
+
+			Intent intent = ResultsActivity.getIntent(getApplicationContext(), AvailableMatchesActivity.class);
+    		Bundle extras = new Bundle();
+			extras.putString(KEY_USERNAME, username);
+			intent.putExtras(extras);
+			startActivity(intent);
+	    }
+	    
     	if (str.equalsIgnoreCase(KEY_START_GAME)) {
 		    buffer.interrupt();
 		    
@@ -262,12 +358,14 @@ public class LobbyActivity extends Activity implements OnGestureListener {
     	final RadioButton[] rb = new RadioButton[number];
         
     	r.removeAllViews();
-    	
+
         for(int i=0; i<number; i++){
             rb[i] = new RadioButton(this);
             rb[i].setText(l[i]);
             rb[i].setClickable(false);
             rb[i].setTextSize(15.0f);
+            rb[i].setTypeface(typeFace);
+            rb[i].setTextColor(Color.BLACK);
             LinearLayout.LayoutParams params = new LinearLayout
             		.LayoutParams(LayoutParams.MATCH_PARENT
             		, LayoutParams.MATCH_PARENT, Gravity.TOP);
@@ -299,13 +397,6 @@ public class LobbyActivity extends Activity implements OnGestureListener {
 	   }
 	}
 	
-	@Override
-	protected void onDestroy() {
-	    super.onDestroy();
-	    doUnbindService();
-	    interrupted = true;
-	}
-
 	@Override
 	public boolean onDown(MotionEvent arg0) {
 		return false;
@@ -342,5 +433,18 @@ public class LobbyActivity extends Activity implements OnGestureListener {
 	public boolean onSingleTapUp(MotionEvent arg0) {
 		return false;
 	}
+
+	// TODO
+	@Override
+	public void onBackPressed() {
+		popupPlayerOptionsDialog();
+	}
 	
+	@Override
+	protected void onDestroy() {
+	    super.onDestroy();
+	    doUnbindService();
+	    buffer.interrupt();
+	}
+
 } // end of class

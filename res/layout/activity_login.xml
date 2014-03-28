@@ -4,24 +4,29 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="10dp"
+    android:background="@drawable/loginscreen"
     tools:context=".LoginActivity" >
 
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="CounterSwipe" 
-        android:gravity="center"
-        android:textSize="40sp"
+        android:text="hello! introduce yourself!" 
+        android:textStyle="bold"
+        android:textColor="#000000"
+        android:textSize="15sp"
         android:padding="10sp"
+        android:layout_marginLeft="20sp"
         android:paddingBottom="20sp"
-        android:fontFamily="Calibri" />
+        android:fontFamily="Calibri"
+        android:id="@+id/tvDialogBird" />
 
     <EditText
         android:id="@+id/etUsername"
-        android:layout_marginTop="10dp"
-        android:layout_width="fill_parent"
+        android:layout_marginTop="100dp"
+        android:layout_width="160dp"
+        android:layout_gravity="center"
         android:layout_height="wrap_content"
-        android:hint="ENTER USERNAME"
+        android:hint="username"
         android:password="false"
         android:ems="10" >
 	    <requestFocus />
@@ -31,10 +36,12 @@
         android:id="@+id/btnJoin"
         android:layout_width="108dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="60dp"
+        android:layout_marginTop="70dp"
         android:layout_gravity="center"
-        android:text="JOIN"
-        android:padding="10dp" />
+        android:text="join"
+        android:textStyle="bold"
+        android:padding="10dp"
+        android:background="@drawable/shapebutton"  />
 
     <Button
         android:id="@+id/btnHost"
@@ -42,7 +49,9 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:layout_gravity="center"
-        android:text="HOST"
-        android:padding="10dp" />
+        android:text="host"
+        android:textStyle="bold"
+        android:padding="10dp"
+        android:background="@drawable/shapebutton"  />
 
 </LinearLayout>
